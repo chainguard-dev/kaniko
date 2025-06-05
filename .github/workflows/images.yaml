@@ -2,10 +2,15 @@ name: Build images
 
 on:
   pull_request:
-    branches: ['main']
+    branches:
+      - 'main'
   push:
-    branches: ['main']
-    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+    branches:
+      - 'main'
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+permissions: {}
 
 jobs:
   build-images:
@@ -31,8 +36,6 @@ jobs:
         - warmer
 
         include:
-
-        
         - image: executor
           target: kaniko-executor
           platforms: linux/amd64,linux/arm64,linux/s390x,linux/ppc64le
@@ -62,7 +65,7 @@ jobs:
           release-tag: latest
 
     steps:
-    - uses: actions/checkout@b0e28b5ac45a892f91e7d036f8200cf5ed489415 # v3
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
     # Setup auth if not a PR.
     - if: github.event_name != 'pull_request'
@@ -90,8 +93,8 @@ jobs:
     - uses: docker/setup-qemu-action@5927c834f5b4fdf503fca6f4c7eccda82949e1ee # v3.1.0
       with:
         platforms: ${{ matrix.platforms }}
-    - uses: docker/setup-buildx-action@4fd812986e6c8c2a69e18311145f9371337f27d4 # v1
-    - uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+    - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+    - uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
       id: build-and-push
       with:
         context: .

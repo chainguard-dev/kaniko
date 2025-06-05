@@ -7,7 +7,6 @@ To get started developing, see our [DEVELOPMENT.md](./DEVELOPMENT.md).
 In this file you'll find info on:
 
 - [Contributing to Kaniko](#contributing-to-kaniko)
-  - [Contributor License Agreement](#contributor-license-agreement)
   - [Code reviews](#code-reviews)
   - [Standards](#standards)
     - [Commit Messages](#commit-messages)
@@ -15,18 +14,6 @@ In this file you'll find info on:
   - [Finding something to work on](#finding-something-to-work-on)
   [code](#coding-standards)
 - [Finding something to work on](#finding-something-to-work-on)
-
-## Contributor License Agreement
-
-Contributions to this project must be accompanied by a Contributor License
-Agreement. You (or your employer) retain the copyright to your contribution;
-this simply gives us permission to use and redistribute your contributions as
-part of the project. Head over to <https://cla.developers.google.com/> to see
-your current agreements on file or to sign a new one.
-
-You generally only need to submit a CLA once, so if you've already submitted one
-(even if it was for a different project), you probably don't need to do it
-again.
 
 ## Code reviews
 
@@ -72,6 +59,6 @@ you can find something interesting to work on:
 
 - To find issues that we particularly would like contributors to tackle, look
   for
-  [issues with the "help wanted" label](https://github.com/GoogleContainerTools/kaniko/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22).
+  [issues with the "help wanted" label](https://github.com/chainguard-dev/kaniko/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22).
 - Issues that are good for new folks will additionally be marked with
-  ["good first issue"](https://github.com/GoogleContainerTools/kaniko/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+  ["good first issue"](https://github.com/chainguard-dev/kaniko/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
