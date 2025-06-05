@@ -22,7 +22,7 @@ import (
 	"os"
 	"strings"
 
-	kConfig "github.com/GoogleContainerTools/kaniko/pkg/config"
+	kConfig "github.com/chainguard-dev/kaniko/pkg/config"
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"

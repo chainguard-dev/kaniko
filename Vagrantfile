@@ -3,8 +3,8 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "generic/debian10"
-  config.vm.synced_folder ".", "/go/src/github.com/GoogleContainerTools/kaniko"
-  config.ssh.extra_args = ["-t", "cd /go/src/github.com/GoogleContainerTools/kaniko; bash --login"]
+  config.vm.synced_folder ".", "/go/src/github.com/chainguard-dev/kaniko"
+  config.ssh.extra_args = ["-t", "cd /go/src/github.com/chainguard-dev/kaniko; bash --login"]
 
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update && apt-get install -y \

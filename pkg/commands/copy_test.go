@@ -27,9 +27,9 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
-	"github.com/GoogleContainerTools/kaniko/pkg/util"
-	"github.com/GoogleContainerTools/kaniko/testutil"
+	"github.com/chainguard-dev/kaniko/pkg/dockerfile"
+	"github.com/chainguard-dev/kaniko/pkg/util"
+	"github.com/chainguard-dev/kaniko/testutil"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/moby/buildkit/frontend/dockerfile/instructions"
 	"github.com/pkg/errors"

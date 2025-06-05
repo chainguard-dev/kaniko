@@ -24,10 +24,10 @@ import (
 	"path"
 	"regexp"
 
-	"github.com/GoogleContainerTools/kaniko/pkg/config"
-	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
-	"github.com/GoogleContainerTools/kaniko/pkg/image/remote"
-	"github.com/GoogleContainerTools/kaniko/pkg/util"
+	"github.com/chainguard-dev/kaniko/pkg/config"
+	"github.com/chainguard-dev/kaniko/pkg/dockerfile"
+	"github.com/chainguard-dev/kaniko/pkg/image/remote"
+	"github.com/chainguard-dev/kaniko/pkg/util"
 	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/tarball"
@@ -123,12 +123,12 @@ func warmToFile(cacheDir, img string, opts *config.WarmerOptions) error {
 }
 
 // FetchRemoteImage retrieves a Docker image manifest from a remote source.
-// github.com/GoogleContainerTools/kaniko/image/remote.RetrieveRemoteImage can be used as
+// github.com/chainguard-dev/kaniko/image/remote.RetrieveRemoteImage can be used as
 // this type.
 type FetchRemoteImage func(image string, opts config.RegistryOptions, customPlatform string) (v1.Image, error)
 
 // FetchLocalSource retrieves a Docker image manifest from a local source.
-// github.com/GoogleContainerTools/kaniko/cache.LocalSource can be used as
+// github.com/chainguard-dev/kaniko/cache.LocalSource can be used as
 // this type.
 type FetchLocalSource func(*config.CacheOptions, string) (v1.Image, error)
 

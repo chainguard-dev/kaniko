@@ -19,8 +19,8 @@ package bucket
 import (
 	"testing"
 
-	"github.com/GoogleContainerTools/kaniko/pkg/constants"
-	"github.com/GoogleContainerTools/kaniko/testutil"
+	"github.com/chainguard-dev/kaniko/pkg/constants"
+	"github.com/chainguard-dev/kaniko/testutil"
 )
 
 func Test_GetBucketAndItem(t *testing.T) {

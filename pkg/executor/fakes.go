@@ -22,8 +22,8 @@ import (
 	"errors"
 	"io"
 
-	"github.com/GoogleContainerTools/kaniko/pkg/commands"
-	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
+	"github.com/chainguard-dev/kaniko/pkg/commands"
+	"github.com/chainguard-dev/kaniko/pkg/dockerfile"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/types"
 )

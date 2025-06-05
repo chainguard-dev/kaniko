@@ -1,4 +1,4 @@
-module github.com/GoogleContainerTools/kaniko
+module github.com/chainguard-dev/kaniko
 
 go 1.24.0
 
