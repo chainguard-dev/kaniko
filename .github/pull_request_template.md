@@ -21,7 +21,7 @@ _See [the contribution guide](../CONTRIBUTING.md) for more details._
 
 **Reviewer Notes**
 
-- [ ] The code flow looks good. 
+- [ ] The code flow looks good.
 - [ ] Unit tests and or integration tests added.
 
 
