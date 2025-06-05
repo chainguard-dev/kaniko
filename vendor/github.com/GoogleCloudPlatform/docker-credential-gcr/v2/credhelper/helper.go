@@ -19,20 +19,20 @@ for GCR authentication.
 package credhelper
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"strings"
 
+	cloudcreds "cloud.google.com/go/auth/credentials"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/auth"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/config"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/store"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/util/cmd"
 	"github.com/docker/docker-credential-helpers/credentials"
-
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 )
 
 // gcrCredHelper implements a credentials.Helper interface backed by a GCR
@@ -146,11 +146,7 @@ func (ch *gcrCredHelper) getGCRAccessToken() (string, error) {
 }
 
 /*
-tokenFromEnv retrieves a gcloud access_token from the environment.
-
-From https://godoc.org/golang.org/x/oauth2/google:
-
-DefaultTokenSource is a token source that uses "Application Default Credentials".
+tokenFromEnv retrieves a JWT access_token from the environment.
 
 It looks for credentials in the following places, preferring the first location found:
 
@@ -165,25 +161,28 @@ It looks for credentials in the following places, preferring the first location 
     (In this final case any provided scopes are ignored.)
 */
 func tokenFromEnv() (string, error) {
-	ts, err := google.DefaultTokenSource(config.OAuthHTTPContext, config.GCRScopes...)
+	creds, err := cloudcreds.DetectDefault(&cloudcreds.DetectOptions{
+		Scopes:           config.GCRScopes,
+		UseSelfSignedJWT: true,
+	})
+	if err != nil {
+		return "", helperErr("failed to detect default credentials", err)
+	}
+
+	token, err := creds.Token(context.Background())
 	if err != nil {
 		return "", err
 	}
 
-	token, err := ts.Token()
-	if err != nil {
-		return "", err
-	}
-
-	if !token.Valid() {
+	if !token.IsValid() {
 		return "", helperErr("token was invalid", nil)
 	}
 
-	if token.Type() != "Bearer" {
-		return "", helperErr(fmt.Sprintf("expected token type \"Bearer\" but got \"%s\"", token.Type()), nil)
+	if token.Type != "Bearer" {
+		return "", helperErr(fmt.Sprintf("expected token type \"Bearer\" but got \"%s\"", token.Type), nil)
 	}
 
-	return token.AccessToken, nil
+	return token.Value, nil
 }
 
 // tokenFromGcloudSDK attempts to generate an access_token using the gcloud SDK.

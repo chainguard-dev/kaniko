@@ -12,6 +12,50 @@ The helper implements the [Docker Credential Store](https://docs.docker.com/engi
 
 For even more authentication options, see GCR's documentation on [advanced authentication methods](https://cloud.google.com/container-registry/docs/advanced-authentication).
 
+## Installation
+
+Download [latest release](https://github.com/GoogleCloudPlatform/docker-credential-gcr/releases/latest).
+
+Install manually:
+
+```
+go install github.com/GoogleCloudPlatform/docker-credential-gcr/v2@latest
+```
+
+## Configuration and Usage
+
+* Configure the Docker CLI to use `docker-credential-gcr` as a credential helper for the default set of GCR registries:
+
+	```shell
+	docker-credential-gcr configure-docker
+	```
+
+  To speed up `docker build`s, you can instead configure a minimal set of registries:
+
+  ```shell
+  docker-credential-gcr configure-docker --registries="gcr.io,us-west1-docker.pkg.dev,docker.europe-west3.rep.pkg.dev"
+  ```
+
+  * Alternatively, use the [manual configuration instructions](#manual-docker-client-configuration) below to configure your version of the Docker client.
+
+* Log in to GCR (or don't! See the [GCR Credentials section](#gcr-credentials))
+
+	```shell
+	docker-credential-gcr gcr-login
+	```
+
+* Use Docker!
+
+	```shell
+	docker pull gcr.io/project-id/neato-container
+	```
+
+* Log out from GCR
+
+	```shell
+	docker-credential-gcr gcr-logout
+	```
+
 ## GCR Credentials
 
 _By default_, the helper searches for GCR credentials in the following order:
@@ -49,65 +93,6 @@ echo "https://gcr.io" | docker-credential-gcr get
 ## Other Credentials
 
 As of the 2.0 release, `docker-credential-gcr` no longer supports generalized [`credsStore`](https://docs.docker.com/engine/reference/commandline/login/#/credentials-store) functionality.
-
-### Building from Source
-
-The program in this repository is written with the Go programming language and can be built with `go build`. These instructions assume you are using [**Go 1.13+**](https://golang.org/) or higher.
-
-You can download the source code, compile the binary, and put it in your `$GOPATH` with `go get`.
-
-```shell
-go get -u github.com/GoogleCloudPlatform/docker-credential-gcr/v2
-```
-
-If `$GOPATH/bin` is in your system `$PATH`, this will also automatically install the compiled binary. You can confirm using `which docker-credential-gcr` and continue to the [section on Configuration and Usage](#configuration-and-usage).
-
-Alternatively, you can use `go build` to build the program. This creates a `docker-credential-gcr` executable.
-
-```shell
-cd $GOPATH/src/github.com/GoogleCloudPlatform/docker-credential-gcr
-go build
-```
-
-Then, you can put that binary in your `$PATH` to make it visible to `docker`. For example, if `/usr/bin` is present in your system path:
-
-```shell
-sudo mv ./docker-credential-gcr /usr/bin/docker-credential-gcr
-```
-
-## Configuration and Usage
-
-* Configure the Docker CLI to use `docker-credential-gcr` as a credential helper for the default set of GCR registries:
-
-	```shell
-	docker-credential-gcr configure-docker
-	```
-
-  To speed up `docker build`s, you can instead configure a minimal set of registries:
-
-  ```shell
-  docker-credential-gcr configure-docker --registries="eu.gcr.io, marketplace.gcr.io"
-  ```
-
-  * Alternatively, use the [manual configuration instructions](#manual-docker-client-configuration) below to configure your version of the Docker client.
-
-* Log in to GCR (or don't! See the [GCR Credentials section](#gcr-credentials))
-
-	```shell
-	docker-credential-gcr gcr-login
-	```
-
-* Use Docker!
-
-	```shell
-	docker pull gcr.io/project-id/neato-container
-	```
-
-* Log out from GCR
-
-	```shell
-	docker-credential-gcr gcr-logout
-	```
 
 ### Manual Docker Client Configuration
 
