@@ -184,6 +184,7 @@ Right now, kaniko supports these storage solutions:
 - GCS Bucket
 - S3 Bucket
 - Azure Blob Storage
+- HTTP/HTTPS URLs
 - Local Directory
 - Local Tar
 - Standard Input
@@ -228,6 +229,7 @@ specify the location of your build context:
 | Standard Input     | tar://[stdin]                                                         | `tar://stdin`                                                                 |
 | GCS Bucket         | gs://[bucket name]/[path to .tar.gz]                                  | `gs://kaniko-bucket/path/to/context.tar.gz`                                   |
 | S3 Bucket          | s3://[bucket name]/[path to .tar.gz]                                  | `s3://kaniko-bucket/path/to/context.tar.gz`                                   |
+| HTTP/HTTPS URL     | http://[url to .tar.gz] or https://[url to .tar.gz]                   | `http://example.com/context.tar.gz`                                           |
 | Azure Blob Storage | https://[account].[azureblobhostsuffix]/[container]/[path to .tar.gz] | `https://myaccount.blob.core.windows.net/container/path/to/context.tar.gz`    |
 | Git Repository     | git://[repository url][#reference][#commit-id]                        | `git://github.com/acme/myproject.git#refs/heads/mybranch#<desired-commit-id>` |
 
