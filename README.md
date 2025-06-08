@@ -244,6 +244,14 @@ If you are using Azure Blob Storage for context file, you will need to pass
 as an environment variable named `AZURE_STORAGE_ACCESS_KEY` through Kubernetes
 Secrets
 
+### Using S3 Presigned URLs
+
+You can use S3 presigned URLs with the `https://` prefix instead of the `s3://` prefix. This is useful when you need to provide temporary access to private S3 objects without requiring AWS credentials in the kaniko container.
+
+```shell
+--context=https://my-bucket.s3.amazonaws.com/context.tar.gz?AWSAccessKeyId=...&Signature=...
+```
+
 ### Using Private Git Repository
 
 You can use `Personal Access Tokens` for Build Contexts from Private
