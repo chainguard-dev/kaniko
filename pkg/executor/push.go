@@ -456,8 +456,12 @@ func uploadTarFile(opts *config.KanikoOptions, tagToImage map[name.Tag]v1.Image)
 		}
 		defer file.Close()
 
-		// Create HTTP request
-		req, err := http.NewRequest("POST", opts.UploadTarURL, file)
+		// Create HTTP request with configurable method
+		method := opts.UploadTarMethod
+		if method == "" {
+			method = "PUT" // Default method
+		}
+		req, err := http.NewRequest(method, opts.UploadTarURL, file)
 		if err != nil {
 			return errors.Wrap(err, "creating HTTP request")
 		}

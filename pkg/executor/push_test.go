@@ -520,8 +520,8 @@ func TestUploadTarFile(t *testing.T) {
 		{
 			name: "successful upload",
 			serverHandler: func(w http.ResponseWriter, r *http.Request) {
-				if r.Method != "POST" {
-					t.Errorf("Expected POST request, got %s", r.Method)
+				if r.Method != "PUT" {
+					t.Errorf("Expected PUT request, got %s", r.Method)
 				}
 				if r.Header.Get("Content-Type") != "application/x-tar" {
 					t.Errorf("Expected Content-Type application/x-tar, got %s", r.Header.Get("Content-Type"))
@@ -668,5 +668,67 @@ func TestUploadTarFileInvalidURL(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "unsupported protocol scheme") {
 		t.Errorf("Expected unsupported protocol scheme error, got: %v", err)
+	}
+}
+
+func TestUploadTarFileHTTPMethods(t *testing.T) {
+	tests := []struct {
+		name           string
+		method         string
+		expectedMethod string
+	}{
+		{
+			name:           "PUT method",
+			method:         "PUT",
+			expectedMethod: "PUT",
+		},
+		{
+			name:           "POST method",
+			method:         "POST",
+			expectedMethod: "POST",
+		},
+		{
+			name:           "PATCH method",
+			method:         "PATCH",
+			expectedMethod: "PATCH",
+		},
+		{
+			name:           "default method (empty)",
+			method:         "",
+			expectedMethod: "PUT",
+		},
+		{
+			name:           "custom method (no validation)",
+			method:         "DELETE",
+			expectedMethod: "DELETE",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != test.expectedMethod {
+					t.Errorf("Expected %s request, got %s", test.expectedMethod, r.Method)
+				}
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			opts := &config.KanikoOptions{
+				UploadTarURL:    server.URL,
+				UploadTarMethod: test.method,
+				UploadTarRetry:  0,
+			}
+
+			tag, _ := name.NewTag("test/image:latest")
+			tagToImage := map[name.Tag]v1.Image{
+				tag: empty.Image,
+			}
+
+			err := uploadTarFile(opts, tagToImage)
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+		})
 	}
 }

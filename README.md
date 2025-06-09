@@ -102,6 +102,7 @@ _If you are interested in contributing to kaniko, see
     - [Flag `--target`](#flag---target)
     - [Flag `--upload-tar`](#flag---upload-tar)
     - [Flag `--upload-tar-retry`](#flag---upload-tar-retry)
+    - [Flag `--upload-tar-method`](#flag---upload-tar-method)
     - [Flag `--use-new-run`](#flag---use-new-run)
     - [Flag `--verbosity`](#flag---verbosity)
     - [Flag `--ignore-var-run`](#flag---ignore-var-run)
@@ -261,10 +262,10 @@ You can use S3 presigned URLs with the `https://` prefix instead of the `s3://` 
 You can also use S3 presigned URLs with the `--upload-tar` flag to upload the built image directly to S3:
 
 ```shell
---upload-tar=https://my-bucket.s3.amazonaws.com/images/my-image.tar?AWSAccessKeyId=...&Signature=...
+--upload-tar=https://my-bucket.s3.amazonaws.com/images/my-image.tar?AWSAccessKeyId=...&Signature=... --upload-tar-method=PUT
 ```
 
-This allows you to store built images in S3 without configuring AWS credentials in the kaniko container.
+This allows you to store built images in S3 without configuring AWS credentials in the kaniko container. Note that S3 presigned URLs typically require the PUT method.
 
 ### Using Private Git Repository
 
@@ -1144,7 +1145,9 @@ Set this flag to indicate which build stage is the target build stage.
 
 #### Flag `--upload-tar`
 
-Set this flag as `--upload-tar=<url>` to upload the built image as a tarball to an HTTP/HTTPS endpoint via POST request. The URL must use either `http://` or `https://` scheme. The tar file will be sent with `Content-Type: application/x-tar` header.
+Set this flag as `--upload-tar=<url>` to upload the built image as a tarball to an HTTP/HTTPS endpoint. The URL must use either `http://` or `https://` scheme. The tar file will be sent with `Content-Type: application/x-tar` header.
+
+The HTTP method can be configured using `--upload-tar-method` (defaults to PUT).
 
 You need to set `--destination` as well (for example `--destination=image`). If you want to upload the tarball without pushing to a registry, also set `--no-push`.
 
@@ -1158,8 +1161,12 @@ Retries use exponential backoff starting at 1 second (1s, 2s, 4s, 8s, etc.). Bot
 
 Example:
 ```bash
---upload-tar=https://api.example.com/images --upload-tar-retry=3
+--upload-tar=https://api.example.com/images --upload-tar-retry=3 --upload-tar-method=PUT
 ```
+
+#### Flag `--upload-tar-method`
+
+Set this flag as `--upload-tar-method=<method>` to specify the HTTP method for the upload operation when using `--upload-tar`. The default is `PUT`.
 
 #### Flag `--use-new-run`
 

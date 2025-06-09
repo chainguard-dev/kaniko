@@ -78,6 +78,7 @@ type KanikoOptions struct {
 	ImageFSExtractRetry      int
 	UploadTarURL             string
 	UploadTarRetry           int
+	UploadTarMethod          string
 	SingleSnapshot           bool
 	Reproducible             bool
 	NoPush                   bool
