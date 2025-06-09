@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -255,6 +256,17 @@ func DoPush(image v1.Image, opts *config.KanikoOptions) error {
 		}
 	}
 
+	if opts.UploadTarURL != "" {
+		tagToImage := map[name.Tag]v1.Image{}
+
+		for _, destRef := range destRefs {
+			tagToImage[destRef] = image
+		}
+		if err := uploadTarFile(opts, tagToImage); err != nil {
+			return errors.Wrap(err, "uploading tarball failed")
+		}
+	}
+
 	if opts.NoPush {
 		logrus.Info("Skipping push to container registry due to --no-push flag")
 		return nil
@@ -408,6 +420,75 @@ func pushLayerToCache(opts *config.KanikoOptions, cacheKey string, tarPath strin
 		cacheOpts.NoPush = true
 	}
 	return DoPush(empty, &cacheOpts)
+}
+
+// uploadTarFile uploads the tar file to the specified URL with retry logic
+func uploadTarFile(opts *config.KanikoOptions, tagToImage map[name.Tag]v1.Image) error {
+	logrus.Info("Uploading tar file to URL")
+
+	// Create a temporary file for the tar
+	tempFile, err := os.CreateTemp("", "kaniko-upload-*.tar")
+	if err != nil {
+		return errors.Wrap(err, "creating temporary tar file")
+	}
+	tempFilePath := tempFile.Name()
+	tempFile.Close() // Close immediately, we'll reopen for each attempt
+
+	defer os.Remove(tempFilePath)
+
+	// Write the tar content to the temporary file
+	if err := tarball.MultiWriteToFile(tempFilePath, tagToImage); err != nil {
+		return errors.Wrap(err, "writing tar content to temporary file")
+	}
+
+	// Get file size for Content-Length header
+	stat, err := os.Stat(tempFilePath)
+	if err != nil {
+		return errors.Wrap(err, "getting file stats")
+	}
+
+	// Define retry function
+	retryFunc := func() error {
+		// Open file fresh for each attempt
+		file, err := os.Open(tempFilePath)
+		if err != nil {
+			return errors.Wrap(err, "opening temporary tar file for reading")
+		}
+		defer file.Close()
+
+		// Create HTTP request
+		req, err := http.NewRequest("POST", opts.UploadTarURL, file)
+		if err != nil {
+			return errors.Wrap(err, "creating HTTP request")
+		}
+
+		// Set headers
+		req.Header.Set("Content-Type", "application/x-tar")
+		req.ContentLength = stat.Size()
+
+		// Perform the upload
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return errors.Wrap(err, "performing HTTP upload")
+		}
+		defer resp.Body.Close()
+
+		// Check status code
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			body, _ := io.ReadAll(resp.Body)
+			return fmt.Errorf("HTTP bad status from server: %s, body: %s", resp.Status, string(body))
+		}
+
+		return nil
+	}
+
+	// Retry the upload with exponential backoff
+	if err := util.Retry(retryFunc, opts.UploadTarRetry, 1000); err != nil {
+		return errors.Wrap(err, "failed to upload tar file")
+	}
+
+	logrus.Info("Successfully uploaded tar file to URL")
+	return nil
 }
 
 // setDummyDestinations sets the dummy destinations required to generate new

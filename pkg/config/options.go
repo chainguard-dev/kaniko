@@ -76,6 +76,8 @@ type KanikoOptions struct {
 	Compression              Compression
 	CompressionLevel         int
 	ImageFSExtractRetry      int
+	UploadTarURL             string
+	UploadTarRetry           int
 	SingleSnapshot           bool
 	Reproducible             bool
 	NoPush                   bool
