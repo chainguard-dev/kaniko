@@ -250,9 +250,21 @@ Secrets
 
 You can use S3 presigned URLs with the `https://` prefix instead of the `s3://` prefix. This is useful when you need to provide temporary access to private S3 objects without requiring AWS credentials in the kaniko container.
 
+**For build contexts:**
+
 ```shell
 --context=https://my-bucket.s3.amazonaws.com/context.tar.gz?AWSAccessKeyId=...&Signature=...
 ```
+
+**For uploading built images:**
+
+You can also use S3 presigned URLs with the `--upload-tar` flag to upload the built image directly to S3:
+
+```shell
+--upload-tar=https://my-bucket.s3.amazonaws.com/images/my-image.tar?AWSAccessKeyId=...&Signature=...
+```
+
+This allows you to store built images in S3 without configuring AWS credentials in the kaniko container.
 
 ### Using Private Git Repository
 
