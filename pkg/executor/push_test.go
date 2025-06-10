@@ -24,6 +24,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/chainguard-dev/kaniko/pkg/config"
@@ -31,6 +32,8 @@ import (
 	"github.com/chainguard-dev/kaniko/testutil"
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
+	v1 "github.com/google/go-containerregistry/pkg/v1"
+	"github.com/google/go-containerregistry/pkg/v1/empty"
 	"github.com/google/go-containerregistry/pkg/v1/layout"
 	"github.com/google/go-containerregistry/pkg/v1/random"
 	"github.com/google/go-containerregistry/pkg/v1/validate"
@@ -504,4 +507,228 @@ func TestWriteDigestFile(t *testing.T) {
 			t.Errorf("expected uploaded content to be 'test', but got '%s'", uploadedContent)
 		}
 	})
+}
+
+func TestUploadTarFile(t *testing.T) {
+	tests := []struct {
+		name           string
+		serverHandler  http.HandlerFunc
+		retryCount     int
+		expectedError  bool
+		expectedCalls  int
+	}{
+		{
+			name: "successful upload",
+			serverHandler: func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != "PUT" {
+					t.Errorf("Expected PUT request, got %s", r.Method)
+				}
+				if r.Header.Get("Content-Type") != "application/x-tar" {
+					t.Errorf("Expected Content-Type application/x-tar, got %s", r.Header.Get("Content-Type"))
+				}
+				w.WriteHeader(http.StatusOK)
+			},
+			retryCount:    0,
+			expectedError: false,
+			expectedCalls: 1,
+		},
+		{
+			name: "server error with retry success",
+			serverHandler: func() http.HandlerFunc {
+				callCount := 0
+				return func(w http.ResponseWriter, r *http.Request) {
+					callCount++
+					if callCount == 1 {
+						w.WriteHeader(http.StatusInternalServerError)
+						return
+					}
+					w.WriteHeader(http.StatusOK)
+				}
+			}(),
+			retryCount:    1,
+			expectedError: false,
+			expectedCalls: 2,
+		},
+		{
+			name: "permanent failure",
+			serverHandler: func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Bad request"))
+			},
+			retryCount:    2,
+			expectedError: true,
+			expectedCalls: 3, // Retries happen for all HTTP errors in current implementation
+		},
+		{
+			name: "server error with retries exhausted",
+			serverHandler: func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			},
+			retryCount:    1,
+			expectedError: true,
+			expectedCalls: 2, // Initial + 1 retry
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			callCount := 0
+			wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				callCount++
+				test.serverHandler(w, r)
+			})
+
+			server := httptest.NewServer(wrappedHandler)
+			defer server.Close()
+
+			opts := &config.KanikoOptions{
+				UploadTarURL:   server.URL,
+				UploadTarRetry: test.retryCount,
+			}
+
+			// Create a simple image map for testing
+			tag, _ := name.NewTag("test/image:latest")
+			tagToImage := map[name.Tag]v1.Image{
+				tag: empty.Image,
+			}
+
+			err := uploadTarFile(opts, tagToImage)
+
+			if test.expectedError && err == nil {
+				t.Errorf("Expected error but got none")
+			}
+			if !test.expectedError && err != nil {
+				t.Errorf("Expected no error but got: %v", err)
+			}
+
+			if callCount != test.expectedCalls {
+				t.Errorf("Expected %d server calls, got %d", test.expectedCalls, callCount)
+			}
+		})
+	}
+}
+
+func TestUploadTarFileHeaders(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Verify headers
+		contentType := r.Header.Get("Content-Type")
+		if contentType != "application/x-tar" {
+			t.Errorf("Expected Content-Type 'application/x-tar', got '%s'", contentType)
+		}
+
+		// Content-Length may be set by the HTTP client automatically
+		// We just verify that the body is not empty
+		if r.ContentLength <= 0 {
+			t.Errorf("Expected positive ContentLength, got %d", r.ContentLength)
+		}
+
+		// Verify we can read the body
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("Error reading request body: %v", err)
+		}
+		if len(body) == 0 {
+			t.Error("Expected non-empty request body")
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	opts := &config.KanikoOptions{
+		UploadTarURL:   server.URL,
+		UploadTarRetry: 0,
+	}
+
+	tag, _ := name.NewTag("test/image:latest")
+	tagToImage := map[name.Tag]v1.Image{
+		tag: empty.Image,
+	}
+
+	err := uploadTarFile(opts, tagToImage)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+}
+
+func TestUploadTarFileInvalidURL(t *testing.T) {
+	opts := &config.KanikoOptions{
+		UploadTarURL:   "not-a-valid-url",
+		UploadTarRetry: 0,
+	}
+
+	tag, _ := name.NewTag("test/image:latest")
+	tagToImage := map[name.Tag]v1.Image{
+		tag: empty.Image,
+	}
+
+	err := uploadTarFile(opts, tagToImage)
+	if err == nil {
+		t.Error("Expected error for invalid URL")
+	}
+	if !strings.Contains(err.Error(), "unsupported protocol scheme") {
+		t.Errorf("Expected unsupported protocol scheme error, got: %v", err)
+	}
+}
+
+func TestUploadTarFileHTTPMethods(t *testing.T) {
+	tests := []struct {
+		name           string
+		method         string
+		expectedMethod string
+	}{
+		{
+			name:           "PUT method",
+			method:         "PUT",
+			expectedMethod: "PUT",
+		},
+		{
+			name:           "POST method",
+			method:         "POST",
+			expectedMethod: "POST",
+		},
+		{
+			name:           "PATCH method",
+			method:         "PATCH",
+			expectedMethod: "PATCH",
+		},
+		{
+			name:           "default method (empty)",
+			method:         "",
+			expectedMethod: "PUT",
+		},
+		{
+			name:           "custom method (no validation)",
+			method:         "DELETE",
+			expectedMethod: "DELETE",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != test.expectedMethod {
+					t.Errorf("Expected %s request, got %s", test.expectedMethod, r.Method)
+				}
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			opts := &config.KanikoOptions{
+				UploadTarURL:    server.URL,
+				UploadTarMethod: test.method,
+				UploadTarRetry:  0,
+			}
+
+			tag, _ := name.NewTag("test/image:latest")
+			tagToImage := map[name.Tag]v1.Image{
+				tag: empty.Image,
+			}
+
+			err := uploadTarFile(opts, tagToImage)
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+		})
+	}
 }
