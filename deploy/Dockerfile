@@ -68,9 +68,9 @@ RUN --mount=from=busybox,dst=/usr/ ["busybox", "sh", "-c", "mkdir -p /kaniko && 
 
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /kaniko/ssl/certs/
 COPY files/nsswitch.conf /etc/nsswitch.conf
-ENV HOME /root
-ENV USER root
-ENV PATH /usr/local/bin:/kaniko
+ENV HOME=/root
+ENV USER=root
+ENV PATH=/usr/local/bin:/kaniko
 ENV SSL_CERT_DIR=/kaniko/ssl/certs
 
 FROM kaniko-base-slim AS kaniko-base
@@ -81,8 +81,8 @@ COPY --from=builder --chown=0:0 /usr/local/bin/docker-credential-acr-env /kaniko
 
 COPY --from=builder /kaniko/.docker /kaniko/.docker
 
-ENV DOCKER_CONFIG /kaniko/.docker/
-ENV DOCKER_CREDENTIAL_GCR_CONFIG /kaniko/.config/gcloud/docker_credential_gcr_config.json
+ENV DOCKER_CONFIG=/kaniko/.docker/
+ENV DOCKER_CREDENTIAL_GCR_CONFIG=/kaniko/.config/gcloud/docker_credential_gcr_config.json
 WORKDIR /workspace
 
 ### FINAL STAGES ###
@@ -101,7 +101,7 @@ ENTRYPOINT ["/kaniko/executor"]
 
 FROM kaniko-executor AS kaniko-debug
 
-ENV PATH /usr/local/bin:/kaniko:/busybox
+ENV PATH=/usr/local/bin:/kaniko:/busybox
 
 COPY --from=builder /src/out/warmer /kaniko/warmer
 
