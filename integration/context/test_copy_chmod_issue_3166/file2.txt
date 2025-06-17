@@ -1,0 +1,2 @@
+Test file 2 for issue #3166
+This file also tests COPY --chmod=444 functionality

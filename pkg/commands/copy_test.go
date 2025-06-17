@@ -1148,3 +1148,118 @@ func TestCopyCommand_ExecuteCommand_Extended(t *testing.T) {
 		testutil.CheckDeepEqual(t, "../bam.txt", linkName)
 	})
 }
+
+// TestCopyChmodDirectoryPermissions tests that COPY --chmod correctly handles directory permissions
+// This is a regression test for issue #3166 where --chmod=444 made directories inaccessible
+func TestCopyChmodDirectoryPermissions(t *testing.T) {
+	testDir := t.TempDir()
+
+	// Create source directory structure
+	srcDir := filepath.Join(testDir, "src")
+	testSubDir := filepath.Join(srcDir, "test")
+	err := os.MkdirAll(testSubDir, 0755)
+	if err != nil {
+		t.Fatalf("Failed to create test dir: %v", err)
+	}
+
+	// Create files in the test directory
+	testFile1 := filepath.Join(testSubDir, "file1.txt")
+	err = os.WriteFile(testFile1, []byte("content1"), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file1: %v", err)
+	}
+
+	testFile2 := filepath.Join(testSubDir, "file2.txt")
+	err = os.WriteFile(testFile2, []byte("content2"), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file2: %v", err)
+	}
+
+	tests := []struct {
+		name             string
+		chmod            string
+		expectedDirPerm  fs.FileMode
+		expectedFilePerm fs.FileMode
+	}{
+		{
+			name:             "COPY with --chmod=444 should add execute bit for directories",
+			chmod:            "444",
+			expectedDirPerm:  0555, // r-xr-xr-x for directories
+			expectedFilePerm: 0444, // r--r--r-- for files
+		},
+		{
+			name:             "COPY with --chmod=644 should add execute bit for directories",
+			chmod:            "644",
+			expectedDirPerm:  0755, // rwxr-xr-x for directories
+			expectedFilePerm: 0644, // rw-r--r-- for files
+		},
+		{
+			name:             "COPY with --chmod=755 preserves execute bit",
+			chmod:            "755",
+			expectedDirPerm:  0755, // rwxr-xr-x for both
+			expectedFilePerm: 0755, // rwxr-xr-x for both
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Setup destination
+			destDir := filepath.Join(testDir, "dest_"+tt.chmod)
+			os.RemoveAll(destDir)
+			os.MkdirAll(destDir, 0755)
+
+			// Create copy command
+			copyCmd := &CopyCommand{
+				cmd: &instructions.CopyCommand{
+					SourcesAndDest: instructions.SourcesAndDest{
+						SourcePaths: []string{"test/"},
+						DestPath:    "/file/",
+					},
+					Chmod: tt.chmod,
+				},
+				fileContext: util.FileContext{Root: srcDir},
+			}
+
+			config := &v1.Config{WorkingDir: destDir}
+			buildArgs := &dockerfile.BuildArgs{}
+
+			err := copyCmd.ExecuteCommand(config, buildArgs)
+			if err != nil {
+				t.Fatalf("ExecuteCommand failed: %v", err)
+			}
+
+			// Check directory permissions
+			copiedDir := filepath.Join(destDir, "file")
+			dirInfo, err := os.Stat(copiedDir)
+			if err != nil {
+				t.Fatalf("Failed to stat copied directory: %v", err)
+			}
+
+			dirPerm := dirInfo.Mode().Perm()
+			if dirPerm != tt.expectedDirPerm {
+				t.Errorf("Directory permissions: got %v, want %v", dirPerm, tt.expectedDirPerm)
+			}
+
+			// Check file permissions
+			copiedFile := filepath.Join(copiedDir, "file1.txt")
+			fileInfo, err := os.Stat(copiedFile)
+			if err != nil {
+				t.Fatalf("Failed to stat copied file: %v", err)
+			}
+
+			filePerm := fileInfo.Mode().Perm()
+			if filePerm != tt.expectedFilePerm {
+				t.Errorf("File permissions: got %v, want %v", filePerm, tt.expectedFilePerm)
+			}
+
+			// Verify directory is accessible (can list contents)
+			entries, err := os.ReadDir(copiedDir)
+			if err != nil {
+				t.Errorf("Failed to read directory contents: %v", err)
+			}
+			if len(entries) != 2 {
+				t.Errorf("Expected 2 files in directory, got %d", len(entries))
+			}
+		})
+	}
+}
