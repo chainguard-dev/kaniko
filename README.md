@@ -1426,14 +1426,6 @@ for a subset of images. These can be thought of as a special-case "fast path"
 that can be used in conjunction with the support for general Dockerfiles kaniko
 provides.
 
-## Community
-
-[kaniko-users](https://groups.google.com/forum/#!forum/kaniko-users) Google
-group
-
-To Contribute to kaniko, see [DEVELOPMENT.md](DEVELOPMENT.md) and
-[CONTRIBUTING.md](CONTRIBUTING.md).
-
 ## Limitations
 
 ### mtime and snapshotting
