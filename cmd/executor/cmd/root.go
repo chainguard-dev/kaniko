@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"io/fs"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -104,6 +105,18 @@ func validateFlags() {
 	if _, err := v1.ParsePlatform(opts.CustomPlatform); err != nil {
 		logrus.Fatalf("Invalid platform %q: %v", opts.CustomPlatform, err)
 	}
+
+	// Validate upload-tar URL if provided
+	if opts.UploadTarURL != "" {
+		parsedURL, err := url.Parse(opts.UploadTarURL)
+		if err != nil {
+			logrus.Fatalf("Invalid upload-tar URL %q: %v", opts.UploadTarURL, err)
+		}
+		if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+			logrus.Fatalf("upload-tar URL must use http or https scheme, got: %s", parsedURL.Scheme)
+		}
+	}
+
 }
 
 // RootCmd is the kaniko command that is run
@@ -243,6 +256,9 @@ func addKanikoOptionsFlags() {
 	RootCmd.PersistentFlags().IntVar(&opts.ImageDownloadRetry, "image-download-retry", 0, "Number of retries for downloading the remote image")
 	RootCmd.PersistentFlags().StringVarP(&opts.KanikoDir, "kaniko-dir", "", constants.DefaultKanikoPath, "Path to the kaniko directory, this takes precedence over the KANIKO_DIR environment variable.")
 	RootCmd.PersistentFlags().StringVarP(&opts.TarPath, "tar-path", "", "", "Path to save the image in as a tarball instead of pushing")
+	RootCmd.PersistentFlags().StringVar(&opts.UploadTarURL, "upload-tar", "", "HTTP/HTTPS URL to upload the tar file via HTTP request")
+	RootCmd.PersistentFlags().IntVar(&opts.UploadTarRetry, "upload-tar-retry", 0, "Number of retries for the upload tar operation")
+	RootCmd.PersistentFlags().StringVar(&opts.UploadTarMethod, "upload-tar-method", "PUT", "HTTP method for upload tar operation")
 	RootCmd.PersistentFlags().BoolVarP(&opts.SingleSnapshot, "single-snapshot", "", false, "Take a single snapshot at the end of the build.")
 	RootCmd.PersistentFlags().BoolVarP(&opts.Reproducible, "reproducible", "", false, "Strip timestamps out of the image to make it reproducible")
 	RootCmd.PersistentFlags().StringVarP(&opts.Target, "target", "", "", "Set the target build stage to build")
