@@ -1,4 +1,4 @@
-package remotecontext // import "github.com/docker/docker/builder/remotecontext"
+package remotecontext
 
 import (
 	"bytes"
@@ -96,7 +96,7 @@ func inspectResponse(ct string, r io.Reader, clen int64) (string, io.Reader, err
 	if rlen == 0 {
 		return ct, r, errors.New("empty response")
 	}
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return ct, r, err
 	}
 
@@ -106,7 +106,7 @@ func inspectResponse(ct string, r io.Reader, clen int64) (string, io.Reader, err
 	// content type for files without an extension (e.g. 'Dockerfile')
 	// so if we receive this value we better check for text content
 	contentType := ct
-	if len(ct) == 0 || ct == mimeTypeOctetStream {
+	if ct == "" || ct == mimeTypeOctetStream {
 		contentType, err = detectContentType(preamble)
 		if err != nil {
 			return contentType, bodyReader, err
@@ -115,7 +115,7 @@ func inspectResponse(ct string, r io.Reader, clen int64) (string, io.Reader, err
 
 	contentType = selectAcceptableMIME(contentType)
 	var cterr error
-	if len(contentType) == 0 {
+	if contentType == "" {
 		cterr = fmt.Errorf("unsupported Content-Type %q", ct)
 		contentType = ct
 	}

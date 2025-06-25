@@ -1,4 +1,4 @@
-package image // import "github.com/docker/docker/image"
+package image
 
 import (
 	"context"
@@ -199,7 +199,7 @@ func (imageNotFoundError) NotFound() {}
 func (is *store) Search(term string) (ID, error) {
 	dgst, err := is.digestSet.Lookup(term)
 	if err != nil {
-		if err == digestset.ErrDigestNotFound {
+		if errors.Is(err, digestset.ErrDigestNotFound) {
 			err = imageNotFoundError(term)
 		}
 		return "", errors.WithStack(err)

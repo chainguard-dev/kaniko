@@ -1,8 +1,9 @@
 //go:build linux || freebsd
 
-package system // import "github.com/docker/docker/pkg/system"
+package system
 
 import (
+	"errors"
 	"syscall"
 
 	"golang.org/x/sys/unix"
@@ -16,7 +17,7 @@ func LUtimesNano(path string, ts []syscall.Timespec) error {
 		unix.NsecToTimespec(syscall.TimespecToNsec(ts[1])),
 	}
 	err := unix.UtimesNanoAt(unix.AT_FDCWD, path, uts, unix.AT_SYMLINK_NOFOLLOW)
-	if err != nil && err != unix.ENOSYS {
+	if err != nil && !errors.Is(err, unix.ENOSYS) {
 		return err
 	}
 

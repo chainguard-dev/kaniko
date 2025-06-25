@@ -1,6 +1,6 @@
 // Package useragent provides helper functions to pack
 // version information into a single User-Agent header.
-package useragent // import "github.com/docker/docker/pkg/useragent"
+package useragent
 
 import (
 	"strings"
@@ -16,10 +16,10 @@ func (vi *VersionInfo) isValid() bool {
 	const stopChars = " \t\r\n/"
 	name := vi.Name
 	vers := vi.Version
-	if len(name) == 0 || strings.ContainsAny(name, stopChars) {
+	if name == "" || strings.ContainsAny(name, stopChars) {
 		return false
 	}
-	if len(vers) == 0 || strings.ContainsAny(vers, stopChars) {
+	if vers == "" || strings.ContainsAny(vers, stopChars) {
 		return false
 	}
 	return true
@@ -41,7 +41,7 @@ func AppendVersions(base string, versions ...VersionInfo) string {
 	}
 
 	verstrs := make([]string, 0, 1+len(versions))
-	if len(base) > 0 {
+	if base != "" {
 		verstrs = append(verstrs, base)
 	}
 
