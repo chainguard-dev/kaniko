@@ -25,7 +25,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
+	gauth "cloud.google.com/go/auth"
 	cloudcreds "cloud.google.com/go/auth/credentials"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/auth"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/config"
@@ -174,7 +176,7 @@ func tokenFromEnv() (string, error) {
 		return "", err
 	}
 
-	if !token.IsValid() {
+	if !isValidToken(token) {
 		return "", helperErr("token was invalid", nil)
 	}
 
@@ -183,6 +185,24 @@ func tokenFromEnv() (string, error) {
 	}
 
 	return token.Value, nil
+}
+
+// isValidToken validates that the token is not empty, is not expired, and will
+// not expire in the next 10 seconds.
+//
+// Previously, we used token.IsValid(), but that now returns an error if the
+// token expires within 255 seconds (increased from 10s). This breaks cases like
+// GKE metadata server responses, which sometimes return nearly expired tokens
+// expecting them to be refreshed in the background.
+// See token.IsValid(): https://github.com/googleapis/google-cloud-go/blob/auth/v0.16.2/auth/auth.go#L107
+func isValidToken(t *gauth.Token) bool {
+	if t == nil || t.Value == "" { // invalid token
+		return false
+	}
+	if t.Expiry.Before(time.Now().Add(10 * time.Second)) { // expires within 10s
+		return false
+	}
+	return true
 }
 
 // tokenFromGcloudSDK attempts to generate an access_token using the gcloud SDK.
