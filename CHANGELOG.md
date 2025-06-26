@@ -1,3 +1,11 @@
+# v1.25.0 and newer releases
+
+Find information about newer releases in the
+[releases](https://github.com/chainguard-dev/kaniko/releases) and
+[tags section](https://github.com/chainguard-dev/kaniko/tags/) of
+the source repository and the
+[releases section of the documentation](README.md#releases).
+
 # v1.24.0 Release 2025-05-21
 The executor images in this release are:
 ```
