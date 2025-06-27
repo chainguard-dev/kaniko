@@ -554,9 +554,11 @@ func TestBuildWithLabels(t *testing.T) {
 
 func TestBuildWithAnnotations(t *testing.T) {
 	// TODO(markusthoemmes): buildx/buildkit is a bit more finicky about the URL format.
-	branch, _, url := getBranchCommitAndURL()
-	buildxRepo := "https://" + url + ".git#" + branch
-	kanikoRepo := getGitRepo(false)
+	branch := "annotation-flag"
+	url := "github.com/markusthoemmes/kaniko"
+
+	buildxRepo := "https://" + url + ".git#refs/heads/" + branch
+	kanikoRepo := url + "#refs/heads/" + branch
 
 	dockerfile := fmt.Sprintf("%s/%s/Dockerfile_test_annotation", integrationPath, dockerfilesPath)
 
