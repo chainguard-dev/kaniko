@@ -180,6 +180,7 @@ func initConfig(img partial.WithConfigFile, opts *config.KanikoOptions) (*v1.Con
 		}
 	}
 
+
 	return imageConfig, nil
 }
 
@@ -785,6 +786,9 @@ func DoBuild(opts *config.KanikoOptions) (v1.Image, error) {
 				if err != nil {
 					return nil, err
 				}
+			}
+			if len(opts.Annotations) > 0 {
+				sourceImage = mutate.Annotations(sourceImage, opts.Annotations).(v1.Image)
 			}
 			if opts.Cleanup {
 				if err = util.DeleteFilesystem(); err != nil {
