@@ -2,7 +2,7 @@
 
 FROM ubuntu
 
-COPY --chmod=444 bar/ /bar/
+COPY --chmod=444 context/bar/ /bar/
 
 USER nobody
 
