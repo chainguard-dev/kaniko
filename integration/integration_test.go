@@ -846,26 +846,24 @@ func TestExitCodePropagation(t *testing.T) {
 }
 
 func TestBuildWithAnnotations(t *testing.T) {
-	// TODO(markusthoemmes): buildx/buildkit is a bit more finicky about the URL format.
-	branch := "annotation-flag"
-	url := "github.com/markusthoemmes/kaniko"
-
+	// buildx/buildkit is a bit more finicky about the URL format.
+	branch, _, url := getBranchCommitAndURL()
 	buildxRepo := "https://" + url + ".git#refs/heads/" + branch
 	kanikoRepo := url + "#refs/heads/" + branch
 
-	dockerfile := fmt.Sprintf("%s/%s/Dockerfile_test_annotation", integrationPath, dockerfilesPath)
-
-	testAnnotation := "myannotation=myvalue"
+	dockerfile := "testdata/Dockerfile.trivial"
+	annotationKey := "myannotation"
+	annotationValue := "myvalue"
 
 	// Build with docker
-	dockerImage := GetDockerImage(config.imageRepo, "Dockerfile_test_annotation:myannotation")
+	dockerImage := GetDockerImage(config.imageRepo, "Dockerfile_test_annotation")
 	dockerCmd := exec.Command("docker",
 		"buildx", // Use buildx to support annotations.
 		"build",
 		"--push", // Push the image. Docker engine does not support annotations without pushing.
 		"-t", dockerImage,
 		"-f", dockerfile,
-		"--annotation", testAnnotation,
+		"--annotation", fmt.Sprintf("%s=%s", annotationKey, annotationValue),
 		buildxRepo,
 	)
 	out, err := RunCommandWithoutTest(dockerCmd)
@@ -874,13 +872,13 @@ func TestBuildWithAnnotations(t *testing.T) {
 	}
 
 	// Build with kaniko
-	kanikoImage := GetKanikoImage(config.imageRepo, "Dockerfile_test_annotation:myannotation")
+	kanikoImage := GetKanikoImage(config.imageRepo, "Dockerfile_test_annotation")
 	dockerRunFlags := []string{"run", "--net=host"}
 	dockerRunFlags = addServiceAccountFlags(dockerRunFlags, config.serviceAccount)
 	dockerRunFlags = append(dockerRunFlags, ExecutorImage,
 		"-f", dockerfile,
 		"-d", kanikoImage,
-		"--annotation", testAnnotation,
+		"--annotation", fmt.Sprintf("%s=%s", annotationKey, annotationValue),
 		"-c", fmt.Sprintf("git://%s", kanikoRepo),
 	)
 	kanikoCmd := exec.Command("docker", dockerRunFlags...)
@@ -906,6 +904,10 @@ func TestBuildWithAnnotations(t *testing.T) {
 	}
 	if diff := cmp.Diff(kanikoAnnotations, dockerAnnotations); diff != "" {
 		t.Errorf("Annotation don't match (-kaniko, +docker): %s", diff)
+	}
+
+	if kanikoAnnotations[annotationKey] != annotationValue {
+		t.Errorf("Expected annotation %q to be %q, got annotations: %v", annotationKey, annotationValue, kanikoAnnotations)
 	}
 }
 
