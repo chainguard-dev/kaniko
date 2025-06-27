@@ -553,7 +553,10 @@ func TestBuildWithLabels(t *testing.T) {
 }
 
 func TestBuildWithAnnotations(t *testing.T) {
-	repo := getGitRepo(false)
+	// TODO(markusthoemmes): buildx/buildkit seemingly doesn't like the refs/heads/ notation.
+	branch, _, url := getBranchCommitAndURL()
+	repo := "https://" + url + ".git#" + branch
+
 	dockerfile := fmt.Sprintf("%s/%s/Dockerfile_test_annotation", integrationPath, dockerfilesPath)
 
 	testAnnotation := "myannotation=myvalue"
@@ -561,13 +564,14 @@ func TestBuildWithAnnotations(t *testing.T) {
 	// Build with docker
 	dockerImage := GetDockerImage(config.imageRepo, "Dockerfile_test_annotation:myannotation")
 	dockerCmd := exec.Command("docker",
-		"buildx",
-		"build",
-		"-t", dockerImage,
-		"-f", dockerfile,
-		"--annotation", testAnnotation,
-		repo,
-	)
+		append([]string{
+			"buildx",
+			"build",
+			"-t", dockerImage,
+			"-f", dockerfile,
+			"--annotation", testAnnotation,
+			repo,
+		})...)
 	out, err := RunCommandWithoutTest(dockerCmd)
 	if err != nil {
 		t.Errorf("Failed to build image %s with docker command %q: %s %s", dockerImage, dockerCmd.Args, err, string(out))
