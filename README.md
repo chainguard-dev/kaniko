@@ -2,29 +2,22 @@
 
 ![kaniko logo](logo/Kaniko-Logo.png)
 
-> **NOTE** This is a supported fork of the original GoogleContainerTools/kaniko repository, which was archived in June of 2025.
-
-> Chainguard is going to keep this fork updated, patched, and maintained.
-> We do not plan any major feature work, but bug fixes and other minor contributions are welcome!
-> We don't plan on publishing built release artifacts (container images, etc.) publicly, but they are available to Chainguard customers.
-> You're welcome to build these yourself from this repository if you are not a Chainguard customer.
-> If a community-supported fork emerges, we'll happily shut this one down and migrate to that.
-> If you're interested in helping there, also reach out!
-
 kaniko is a tool to build container images from a Dockerfile, inside a container
 or Kubernetes cluster.
+
+> [!IMPORTANT]
+> This is a supported replacement of the original `GoogleContainerTools/kaniko`
+> repository, which was archived in June of 2025. Further details in
+> [History and Status](#history-and-status).
 
 kaniko doesn't depend on a Docker daemon and executes each command within a
 Dockerfile completely in userspace. This enables building container images in
 environments that can't easily or securely run a Docker daemon, such as a
 standard Kubernetes cluster.
 
-kaniko is meant to be run as an image: `gcr.io/kaniko-project/executor`. We do
-**not** recommend running the kaniko executor binary in another image, as it
-might not work as you expect - see [Known Issues](#known-issues).
-
-_If you are interested in contributing to kaniko, see
-[DEVELOPMENT.md](DEVELOPMENT.md) and [CONTRIBUTING.md](CONTRIBUTING.md)._
+kaniko is meant to be run as [an image](#releases). We do **not** recommend
+running the kaniko executor binary in another image, as it might not work as you
+expect - see [Known Issues](#known-issues).
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -33,6 +26,9 @@ _If you are interested in contributing to kaniko, see
 [DocToc](https://github.com/thlorenz/doctoc)_
 
 - [kaniko - Build Images In Kubernetes](#kaniko---build-images-in-kubernetes)
+  - [History and Status](#history-and-status)
+  - [Community](#community)
+  - [Releases](#releases)
   - [How does kaniko work?](#how-does-kaniko-work)
   - [Known Issues](#known-issues)
   - [Demo](#demo)
@@ -126,10 +122,49 @@ _If you are interested in contributing to kaniko, see
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## History and Status
+
+kaniko was originally created by [Priya Wadhwa
+(@priyawadhwa)](https://github.com/priyawadhwa), [Dan Lorenc
+(dlorenc)](https://github.com/dlorenc), and others at Google and published at
+[GoogleContainerTools/kaniko](https://github.com/GoogleContainerTools/kaniko).
+The project was archived in June 2025 and [forked by Chainguard, including Priya
+and
+Dan,](https://www.chainguard.dev/unchained/fork-yeah-were-bringing-kaniko-back)
+to [chainguard-dev/kaniko](https://github.com/chainguard-dev/kaniko) to continue
+upkeep with security patches and maintenance of the project.
+
+No major feature work is planned, while bug fixes and other minor contributions
+are welcome. 
+
+If another active and community-supported fork emerges, we'll happily shut this
+one down and migrate to that.
+
 ## Community
 
-We'd love to hear from you! Join
-[#kaniko on Kubernetes Slack](https://kubernetes.slack.com/messages/CQDCHGX7Y/)
+If you are interested in contributing to kaniko, learn more from our
+[development](DEVELOPMENT.md) and [contributing](CONTRIBUTING.md) guides and
+find other community members on [#kaniko on Kubernetes
+Slack](https://kubernetes.slack.com/messages/CQDCHGX7Y/)
+
+## Releases
+
+kaniko releases are only created as [tags on the source
+repository](https://github.com/chainguard-dev/kaniko/tags).
+
+Release notes and source code archives are available on the [releases
+section](https://github.com/chainguard-dev/kaniko/releases).
+
+Binary release artifacts such as container images are **not published**. The old
+container images as `gcr.io/kaniko-project/executor` and
+`gcr.io/kaniko-project/warmer` are unmaintained and no longer updated. Users
+[must build these artifacts themselves](DEVELOPMENT.md) or use the Chainguard
+container images as customer:
+
+* [kaniko](https://images.chainguard.dev/directory/image/kaniko)
+* [kaniko-warmer](https://images.chainguard.dev/directory/image/kaniko-warmer)
+* [kaniko-fips](https://images.chainguard.dev/directory/image/kaniko-fips)
+* [kaniko-warmer-fips](https://images.chainguard.dev/directory/image/kaniko-warmer-fips)
 
 ## How does kaniko work?
 
