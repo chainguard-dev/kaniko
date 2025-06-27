@@ -570,6 +570,7 @@ func TestBuildWithAnnotations(t *testing.T) {
 		append([]string{
 			"buildx",
 			"build",
+			"--load", // Load the image into the local docker daemon
 			"-t", dockerImage,
 			"-f", dockerfile,
 			"--annotation", testAnnotation,
