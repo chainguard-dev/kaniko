@@ -1213,7 +1213,7 @@ func TestCopyChmodDirectoryPermissions(t *testing.T) {
 				cmd: &instructions.CopyCommand{
 					SourcesAndDest: instructions.SourcesAndDest{
 						SourcePaths: []string{"test/"},
-						DestPath:    "/file/",
+						DestPath:    "file/",
 					},
 					Chmod: tt.chmod,
 				},
