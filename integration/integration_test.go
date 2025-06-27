@@ -553,9 +553,10 @@ func TestBuildWithLabels(t *testing.T) {
 }
 
 func TestBuildWithAnnotations(t *testing.T) {
-	// TODO(markusthoemmes): buildx/buildkit seemingly doesn't like the refs/heads/ notation.
+	// TODO(markusthoemmes): buildx/buildkit is a bit more finicky about the URL format.
 	branch, _, url := getBranchCommitAndURL()
-	repo := "https://" + url + ".git#" + branch
+	buildxRepo := "https://" + url + ".git#" + branch
+	kanikoRepo := getGitRepo(false)
 
 	dockerfile := fmt.Sprintf("%s/%s/Dockerfile_test_annotation", integrationPath, dockerfilesPath)
 
@@ -570,7 +571,7 @@ func TestBuildWithAnnotations(t *testing.T) {
 			"-t", dockerImage,
 			"-f", dockerfile,
 			"--annotation", testAnnotation,
-			repo,
+			buildxRepo,
 		})...)
 	out, err := RunCommandWithoutTest(dockerCmd)
 	if err != nil {
@@ -585,7 +586,7 @@ func TestBuildWithAnnotations(t *testing.T) {
 		"-f", dockerfile,
 		"-d", kanikoImage,
 		"--annotation", testAnnotation,
-		"-c", fmt.Sprintf("git://%s", repo),
+		"-c", fmt.Sprintf("git://%s", kanikoRepo),
 	)
 
 	kanikoCmd := exec.Command("docker", dockerRunFlags...)
