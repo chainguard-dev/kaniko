@@ -851,7 +851,7 @@ func TestBuildWithAnnotations(t *testing.T) {
 	buildxRepo := "https://" + url + ".git#refs/heads/" + branch
 	kanikoRepo := url + "#refs/heads/" + branch
 
-	dockerfile := "testdata/Dockerfile.trivial"
+	dockerfile := fmt.Sprintf("%s/testdata/Dockerfile.trivial", integrationPath)
 	annotationKey := "myannotation"
 	annotationValue := "myvalue"
 
