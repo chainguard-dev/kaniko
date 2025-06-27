@@ -517,6 +517,7 @@ func TestBuildWithLabels(t *testing.T) {
 	dockerImage := GetDockerImage(config.imageRepo, "Dockerfile_test_label:mylabel")
 	dockerCmd := exec.Command("docker",
 		append([]string{
+			"buildx",
 			"build",
 			"-t", dockerImage,
 			"-f", dockerfile,
@@ -554,7 +555,7 @@ func TestBuildWithLabels(t *testing.T) {
 
 func TestBuildWithAnnotations(t *testing.T) {
 	repo := getGitRepo(false)
-	dockerfile := "testdata/Dockerfile.trivial"
+	dockerfile := fmt.Sprintf("%s/%s/Dockerfile_test_annotation", integrationPath, dockerfilesPath)
 
 	testAnnotation := "myannotation=myvalue"
 
