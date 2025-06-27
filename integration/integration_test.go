@@ -552,6 +552,50 @@ func TestBuildWithLabels(t *testing.T) {
 	checkContainerDiffOutput(t, diff, expected)
 }
 
+func TestBuildWithAnnotations(t *testing.T) {
+	repo := getGitRepo(false)
+	dockerfile := "testdata/Dockerfile.trivial"
+
+	testAnnotation := "myannotation=myvalue"
+
+	// Build with docker
+	dockerImage := GetDockerImage(config.imageRepo, "Dockerfile_test_annotation:myannotation")
+	dockerCmd := exec.Command("docker",
+		"build",
+		"-t", dockerImage,
+		"-f", dockerfile,
+		"--annotation", testAnnotation,
+		repo,
+	)
+	out, err := RunCommandWithoutTest(dockerCmd)
+	if err != nil {
+		t.Errorf("Failed to build image %s with docker command %q: %s %s", dockerImage, dockerCmd.Args, err, string(out))
+	}
+
+	// Build with kaniko
+	kanikoImage := GetKanikoImage(config.imageRepo, "Dockerfile_test_annotation:myannotation")
+	dockerRunFlags := []string{"run", "--net=host"}
+	dockerRunFlags = addServiceAccountFlags(dockerRunFlags, config.serviceAccount)
+	dockerRunFlags = append(dockerRunFlags, ExecutorImage,
+		"-f", dockerfile,
+		"-d", kanikoImage,
+		"--annotation", testAnnotation,
+		"-c", fmt.Sprintf("git://%s", repo),
+	)
+
+	kanikoCmd := exec.Command("docker", dockerRunFlags...)
+
+	out, err = RunCommandWithoutTest(kanikoCmd)
+	if err != nil {
+		t.Errorf("Failed to build image %s with kaniko command %q: %v %s", dockerImage, kanikoCmd.Args, err, string(out))
+	}
+
+	diff := containerDiff(t, daemonPrefix+dockerImage, kanikoImage, "--no-cache")
+
+	expected := fmt.Sprintf(emptyContainerDiff, dockerImage, kanikoImage, dockerImage, kanikoImage)
+	checkContainerDiffOutput(t, diff, expected)
+}
+
 func TestBuildWithHTTPError(t *testing.T) {
 	repo := getGitRepo(false)
 	dockerfile := fmt.Sprintf("%s/%s/Dockerfile_test_add_404", integrationPath, dockerfilesPath)
