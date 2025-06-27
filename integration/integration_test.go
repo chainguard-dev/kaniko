@@ -846,6 +846,13 @@ func TestExitCodePropagation(t *testing.T) {
 }
 
 func TestBuildWithAnnotations(t *testing.T) {
+	// TODO(markusthoemmes): buildx/buildkit is a bit more finicky about the URL format.
+	branch := "annotation-flag"
+	url := "github.com/markusthoemmes/kaniko"
+
+	buildxRepo := "https://" + url + ".git#refs/heads/" + branch
+	kanikoRepo := url + "#refs/heads/" + branch
+
 	dockerfile := fmt.Sprintf("%s/%s/Dockerfile_test_annotation", integrationPath, dockerfilesPath)
 
 	testAnnotation := "myannotation=myvalue"
@@ -859,6 +866,7 @@ func TestBuildWithAnnotations(t *testing.T) {
 		"-t", dockerImage,
 		"-f", dockerfile,
 		"--annotation", testAnnotation,
+		buildxRepo,
 	)
 	out, err := RunCommandWithoutTest(dockerCmd)
 	if err != nil {
@@ -873,6 +881,7 @@ func TestBuildWithAnnotations(t *testing.T) {
 		"-f", dockerfile,
 		"-d", kanikoImage,
 		"--annotation", testAnnotation,
+		"-c", fmt.Sprintf("git://%s", kanikoRepo),
 	)
 	kanikoCmd := exec.Command("docker", dockerRunFlags...)
 	out, err = RunCommandWithoutTest(kanikoCmd)
@@ -902,6 +911,7 @@ func TestBuildWithAnnotations(t *testing.T) {
 
 func getImageManifestAnnotations(t *testing.T, image string) (map[string]string, error) {
 	t.Helper()
+
 	ref, err := name.ParseReference(image, name.WeakValidation)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse image reference %s: %w", image, err)
