@@ -34,6 +34,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/daemon"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
@@ -552,59 +553,6 @@ func TestBuildWithLabels(t *testing.T) {
 	checkContainerDiffOutput(t, diff, expected)
 }
 
-func TestBuildWithAnnotations(t *testing.T) {
-	// TODO(markusthoemmes): buildx/buildkit is a bit more finicky about the URL format.
-	branch := "annotation-flag"
-	url := "github.com/markusthoemmes/kaniko"
-
-	buildxRepo := "https://" + url + ".git#refs/heads/" + branch
-	kanikoRepo := url + "#refs/heads/" + branch
-
-	dockerfile := fmt.Sprintf("%s/%s/Dockerfile_test_annotation", integrationPath, dockerfilesPath)
-
-	testAnnotation := "myannotation=myvalue"
-
-	// Build with docker
-	dockerImage := GetDockerImage(config.imageRepo, "Dockerfile_test_annotation:myannotation")
-	dockerCmd := exec.Command("docker",
-		append([]string{
-			"buildx",
-			"build",
-			"--load", // Load the image into the local docker daemon
-			"-t", dockerImage,
-			"-f", dockerfile,
-			"--annotation", testAnnotation,
-			buildxRepo,
-		})...)
-	out, err := RunCommandWithoutTest(dockerCmd)
-	if err != nil {
-		t.Errorf("Failed to build image %s with docker command %q: %s %s", dockerImage, dockerCmd.Args, err, string(out))
-	}
-
-	// Build with kaniko
-	kanikoImage := GetKanikoImage(config.imageRepo, "Dockerfile_test_annotation:myannotation")
-	dockerRunFlags := []string{"run", "--net=host"}
-	dockerRunFlags = addServiceAccountFlags(dockerRunFlags, config.serviceAccount)
-	dockerRunFlags = append(dockerRunFlags, ExecutorImage,
-		"-f", dockerfile,
-		"-d", kanikoImage,
-		"--annotation", testAnnotation,
-		"-c", fmt.Sprintf("git://%s", kanikoRepo),
-	)
-
-	kanikoCmd := exec.Command("docker", dockerRunFlags...)
-
-	out, err = RunCommandWithoutTest(kanikoCmd)
-	if err != nil {
-		t.Errorf("Failed to build image %s with kaniko command %q: %v %s", dockerImage, kanikoCmd.Args, err, string(out))
-	}
-
-	diff := containerDiff(t, daemonPrefix+dockerImage, kanikoImage, "--no-cache")
-
-	expected := fmt.Sprintf(emptyContainerDiff, dockerImage, kanikoImage, dockerImage, kanikoImage)
-	checkContainerDiffOutput(t, diff, expected)
-}
-
 func TestBuildWithHTTPError(t *testing.T) {
 	repo := getGitRepo(false)
 	dockerfile := fmt.Sprintf("%s/%s/Dockerfile_test_add_404", integrationPath, dockerfilesPath)
@@ -895,6 +843,81 @@ func TestExitCodePropagation(t *testing.T) {
 			t.Fatalf("did not produce the expected error:\n%s", out)
 		}
 	})
+}
+
+func TestBuildWithAnnotations(t *testing.T) {
+	dockerfile := fmt.Sprintf("%s/%s/Dockerfile_test_annotation", integrationPath, dockerfilesPath)
+
+	testAnnotation := "myannotation=myvalue"
+
+	// Build with docker
+	dockerImage := GetDockerImage(config.imageRepo, "Dockerfile_test_annotation:myannotation")
+	dockerCmd := exec.Command("docker",
+		"buildx", // Use buildx to support annotations.
+		"build",
+		"--push", // Push the image. Docker engine does not support annotations without pushing.
+		"-t", dockerImage,
+		"-f", dockerfile,
+		"--annotation", testAnnotation,
+	)
+	out, err := RunCommandWithoutTest(dockerCmd)
+	if err != nil {
+		t.Errorf("Failed to build image %s with docker command %q: %s %s", dockerImage, dockerCmd.Args, err, string(out))
+	}
+
+	// Build with kaniko
+	kanikoImage := GetKanikoImage(config.imageRepo, "Dockerfile_test_annotation:myannotation")
+	dockerRunFlags := []string{"run", "--net=host"}
+	dockerRunFlags = addServiceAccountFlags(dockerRunFlags, config.serviceAccount)
+	dockerRunFlags = append(dockerRunFlags, ExecutorImage,
+		"-f", dockerfile,
+		"-d", kanikoImage,
+		"--annotation", testAnnotation,
+	)
+	kanikoCmd := exec.Command("docker", dockerRunFlags...)
+	out, err = RunCommandWithoutTest(kanikoCmd)
+	if err != nil {
+		t.Errorf("Failed to build image %s with kaniko command %q: %v %s", dockerImage, kanikoCmd.Args, err, string(out))
+	}
+
+	dockerAnnotations, err := getImageManifestAnnotations(t, dockerImage)
+	if err != nil {
+		t.Fatalf("Failed to get annotations for docker image %s: %v", dockerImage, err)
+	}
+	if len(dockerAnnotations) == 0 {
+		t.Fatalf("No annotations found for docker image %s", dockerImage)
+	}
+
+	kanikoAnnotations, err := getImageManifestAnnotations(t, kanikoImage)
+	if err != nil {
+		t.Fatalf("Failed to get annotations for kaniko image %s: %v", kanikoImage, err)
+	}
+	if len(kanikoAnnotations) == 0 {
+		t.Fatalf("No annotations found for kaniko image %s", kanikoImage)
+	}
+	if diff := cmp.Diff(kanikoAnnotations, dockerAnnotations); diff != "" {
+		t.Errorf("Annotation don't match (-kaniko, +docker): %s", diff)
+	}
+}
+
+func getImageManifestAnnotations(t *testing.T, image string) (map[string]string, error) {
+	t.Helper()
+	ref, err := name.ParseReference(image, name.WeakValidation)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse image reference %s: %w", image, err)
+	}
+
+	imgRef, err := remote.Image(ref)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get image reference for %s from remote: %w", image, err)
+	}
+
+	manifest, err := imgRef.Manifest()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get manifest for image %s: %w", image, err)
+	}
+
+	return manifest.Annotations, nil
 }
 
 type fileDiff struct {
