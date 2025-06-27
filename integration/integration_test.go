@@ -517,7 +517,6 @@ func TestBuildWithLabels(t *testing.T) {
 	dockerImage := GetDockerImage(config.imageRepo, "Dockerfile_test_label:mylabel")
 	dockerCmd := exec.Command("docker",
 		append([]string{
-			"buildx",
 			"build",
 			"-t", dockerImage,
 			"-f", dockerfile,
@@ -562,6 +561,7 @@ func TestBuildWithAnnotations(t *testing.T) {
 	// Build with docker
 	dockerImage := GetDockerImage(config.imageRepo, "Dockerfile_test_annotation:myannotation")
 	dockerCmd := exec.Command("docker",
+		"buildx",
 		"build",
 		"-t", dockerImage,
 		"-f", dockerfile,
