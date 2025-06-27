@@ -1,0 +1,9 @@
+# Ref https://github.com/GoogleContainerTools/kaniko/issues/3166
+
+FROM ubuntu
+
+COPY --chmod=444 bar/ /bar/
+
+USER nobody
+
+RUN ls -al /bar

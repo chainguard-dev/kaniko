@@ -683,7 +683,11 @@ func CopyDir(src, dest string, context FileContext, uid, gid int64, chmod fs.Fil
 			logrus.Tracef("Creating directory %s", destPath)
 
 			mode := chmod
-			if useDefaultChmod {
+			// Force 755 permissions for the top-level directory, which is what Docker does
+			// See https://github.com/GoogleContainerTools/kaniko/issues/3166 for context
+			if destPath == dest {
+				mode = 0755
+			} else if useDefaultChmod {
 				mode = fi.Mode()
 			}
 			uid, gid := DetermineTargetFileOwnership(fi, uid, gid)
