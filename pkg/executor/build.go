@@ -786,6 +786,9 @@ func DoBuild(opts *config.KanikoOptions) (v1.Image, error) {
 					return nil, err
 				}
 			}
+			if len(opts.Annotations) > 0 {
+				sourceImage = mutate.Annotations(sourceImage, opts.Annotations).(v1.Image)
+			}
 			if opts.Cleanup {
 				if err = util.DeleteFilesystem(); err != nil {
 					return nil, err

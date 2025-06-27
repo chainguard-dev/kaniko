@@ -54,6 +54,9 @@ jobs:
           persist-credentials: false
 
       - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+        with:
+          driver: docker-container
+          driver-opts: network=host # Allows buildx to access the local registry.
 
       - run: make install-container-diff k3s-setup
       - run: make ${{ matrix.make-target }}
