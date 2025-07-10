@@ -12,12 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Bump these on release
-VERSION_MAJOR ?= 1
-VERSION_MINOR ?= 25
-VERSION_BUILD ?= 0
-
-VERSION ?= v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_BUILD)
+# Get version from git tag
+VERSION ?= $(shell git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
 VERSION_PACKAGE = $(REPOPATH/pkg/version)
 
 SHELL := /bin/bash
