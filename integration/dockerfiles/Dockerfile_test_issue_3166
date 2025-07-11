@@ -1,0 +1,11 @@
+FROM debian
+
+USER nobody
+
+# Fails on main@1d2bff5 before #3166:
+# When we COPY --chmod a folder, the chmod is not only
+# applied to the contents of the copy, but all implicitly created
+# directories too, including the top-level directory.
+COPY --chmod=400 context/foo /some/nested/context
+RUN ls -la /some/nested/context \
+    && touch /tmp/blubb
