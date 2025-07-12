@@ -7,4 +7,5 @@ RUN yum --disableplugin=subscription-manager update -y \
         gcc-4.8.5-39.el7 \
         gcc-c++-4.8.5-39.el7 \
         make-3.82-24.el7 \
-    && yum --disableplugin=subscription-manager clean all
+    && yum --disableplugin=subscription-manager clean all \
+    && rm -rf /var/cache/yum /var/lib/yum/yumdb
