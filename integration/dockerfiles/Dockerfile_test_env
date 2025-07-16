@@ -1,4 +1,4 @@
-FROM debian:10.13
+FROM debian:12.10
 ENV hey hey
 ENV PATH /usr/local
 ENV testmultipleeq="this=is a=test string=with a=lot of=equals"

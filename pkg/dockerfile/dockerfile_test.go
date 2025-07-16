@@ -565,7 +565,7 @@ func Test_SkipingUnusedStages(t *testing.T) {
 		{
 			description: "dockerfile_with_two_copyFrom_and_arg",
 			dockerfile: `
-			FROM debian:10.13 as base
+			FROM debian:12.10 as base
 			COPY . .
 			FROM scratch as second
 			ENV foopath context/foo
@@ -586,9 +586,9 @@ func Test_SkipingUnusedStages(t *testing.T) {
 			`,
 			targets: []string{"base", ""},
 			expectedSourceCodes: map[string][]string{
-				"base":   {"FROM debian:10.13 as base"},
-				"second": {"FROM debian:10.13 as base", "FROM scratch as second"},
-				"":       {"FROM debian:10.13 as base", "FROM scratch as second", "FROM base as fourth", "FROM fourth"},
+				"base":   {"FROM debian:12.10 as base"},
+				"second": {"FROM debian:12.10 as base", "FROM scratch as second"},
+				"":       {"FROM debian:12.10 as base", "FROM scratch as second", "FROM base as fourth", "FROM fourth"},
 			},
 			expectedTargetIndexBeforeSkip: map[string]int{
 				"base":   0,
@@ -605,9 +605,9 @@ func Test_SkipingUnusedStages(t *testing.T) {
 			description: "dockerfile_without_final_dependencies",
 			dockerfile: `
 			FROM alpine:3.11
-			FROM debian:10.13 as base
+			FROM debian:12.10 as base
 			RUN echo foo > /foo
-			FROM debian:10.13 as fizz
+			FROM debian:12.10 as fizz
 			RUN echo fizz >> /fizz
 			COPY --from=base /foo /fizz
 			FROM alpine:3.11 as buzz
@@ -619,8 +619,8 @@ func Test_SkipingUnusedStages(t *testing.T) {
 			expectedSourceCodes: map[string][]string{
 				"final": {"FROM alpine:3.11 as final"},
 				"buzz":  {"FROM alpine:3.11 as buzz"},
-				"fizz":  {"FROM debian:10.13 as base", "FROM debian:10.13 as fizz"},
-				"":      {"FROM alpine:3.11", "FROM debian:10.13 as base", "FROM debian:10.13 as fizz", "FROM alpine:3.11 as buzz", "FROM alpine:3.11 as final"},
+				"fizz":  {"FROM debian:12.10 as base", "FROM debian:12.10 as fizz"},
+				"":      {"FROM alpine:3.11", "FROM debian:12.10 as base", "FROM debian:12.10 as fizz", "FROM alpine:3.11 as buzz", "FROM alpine:3.11 as final"},
 			},
 			expectedTargetIndexBeforeSkip: map[string]int{
 				"final": 4,

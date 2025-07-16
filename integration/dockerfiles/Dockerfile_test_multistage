@@ -1,4 +1,4 @@
-FROM debian:10.13 as base
+FROM debian:12.10 as base
 COPY . .
 
 FROM scratch as second
