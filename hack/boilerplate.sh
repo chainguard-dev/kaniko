@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +17,11 @@ set -e
 # Ignore these paths in the following tests.
 ignore="vendor\|out"
 BOILERPLATEDIR=./hack/boilerplate
-files=$(python3 ${BOILERPLATEDIR}/boilerplate.py --rootdir . --boilerplate-dir ${BOILERPLATEDIR})
+files=$(python3 "${BOILERPLATEDIR}/boilerplate.py" --rootdir . --boilerplate-dir "${BOILERPLATEDIR}")
 
 # Grep returns a non-zero exit code if we don't match anything, which is good in this case.
 set +e
-relevant_files=$(echo "$files" | grep -v $ignore)
+relevant_files=$(echo "${files}" | grep -v "${ignore}")
 set -e
 
 if [[ ! -z ${relevant_files} ]]; then

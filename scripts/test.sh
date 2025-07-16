@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2018 Google LLC
 #
@@ -25,14 +25,14 @@ RESET='\033[0m'
 echo "Running go tests..."
 go test -cover -coverprofile=out/coverage.out -v -timeout 120s `go list ./... | grep -v vendor | grep -v integration` | sed ''/PASS/s//$(printf "${GREEN}PASS${RESET}")/'' | sed ''/FAIL/s//$(printf "${RED}FAIL${RESET}")/''
 GO_TEST_EXIT_CODE=${PIPESTATUS[0]}
-if [[ $GO_TEST_EXIT_CODE -ne 0 ]]; then
-    exit $GO_TEST_EXIT_CODE
+if [[ ${GO_TEST_EXIT_CODE} -ne 0 ]]; then
+    exit "${GO_TEST_EXIT_CODE}"
 fi
 
 echo "Running validation scripts..."
 scripts=(
-    "$DIR/../hack/boilerplate.sh"
-    "$DIR/../hack/gofmt.sh"
+    "${DIR}/../hack/boilerplate.sh"
+    "${DIR}/../hack/gofmt.sh"
 )
 fail=0
 for s in "${scripts[@]}"
@@ -45,4 +45,4 @@ do
         fail=1
     fi
 done
-exit $fail
+exit "${fail}"

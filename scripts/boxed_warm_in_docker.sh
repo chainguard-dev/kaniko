@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2018 Google LLC
 #
@@ -17,7 +17,7 @@
 # Test the warmer in boxed memory conditions.
 # Attempt to run the warmer inside a container limited to 16MB of RAM. Use gcr.io/kaniko-project/warmer:latest image."
 # Example: ./boxed_warm_in_docker.sh --image debian:trixie-slim
-# 
+#
 set -e
 
 rc=0
@@ -25,7 +25,7 @@ docker run \
 	--memory=16m --memory-swappiness=0 \
         gcr.io/kaniko-project/warmer:latest \
 	"$@" || rc=$?
-	
->&2 echo "RC=$rc"
-exit $rc
+
+>&2 echo "RC=${rc}"
+exit "${rc}"
 

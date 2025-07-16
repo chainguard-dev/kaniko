@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2018 Google LLC
 #
@@ -16,7 +16,7 @@
 
 set -e
 
-if [ $# -lt 3 ]; then
+if [[ $# -lt 3 ]]; then
     echo "Usage: run_in_docker.sh <path to Dockerfile> <context directory> <image tag> <cache>"
     exit 1
 fi
@@ -26,24 +26,24 @@ context=$2
 destination=$3
 
 cache="false"
-if [[ ! -z "$4" ]]; then
+if [[ -n "$4" ]]; then
     cache=$4
 fi
 
-if [[ $destination == *"gcr"* ]]; then
-    if [[ ! -e $HOME/.config/gcloud/application_default_credentials.json ]]; then
+if [[ ${destination} == *"gcr"* ]]; then
+    if [[ ! -e ${HOME}/.config/gcloud/application_default_credentials.json ]]; then
         echo "Application Default Credentials do not exist. Run [gcloud auth application-default login] to configure them"
         exit 1
     fi
     docker run \
-        -v "$HOME"/.config/gcloud:/root/.config/gcloud \
-        -v "$context":/workspace \
+        -v "${HOME}"/.config/gcloud:/root/.config/gcloud \
+        -v "${context}":/workspace \
         gcr.io/kaniko-project/executor:latest \
         --dockerfile "${dockerfile}" --destination "${destination}" --context dir:///workspace/ \
         --cache="${cache}"
 else
     docker run \
-        -v "$context":/workspace \
+        -v "${context}":/workspace \
         gcr.io/kaniko-project/executor:latest \
         --dockerfile "${dockerfile}" --destination "${destination}" --context dir:///workspace/ \
         --cache="${cache}"

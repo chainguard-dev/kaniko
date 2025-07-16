@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,14 +38,14 @@ FLAGS=(
   "--timeout=50m"
 )
 
-if [[ -n $DOCKERFILE_PATTERN ]]; then
-  FLAGS+=("--dockerfiles-pattern=$DOCKERFILE_PATTERN")
+if [[ -n ${DOCKERFILE_PATTERN} ]]; then
+  FLAGS+=("--dockerfiles-pattern=${DOCKERFILE_PATTERN}")
 fi
 
-if [[ -n $LOCAL ]]; then
+if [[ -n ${LOCAL} ]]; then
   echo "running in local mode, mocking registry and gcs bucket..."
   start_local_registry
-  
+
   IMAGE_REPO="localhost:5000/kaniko-test"
   GCS_BUCKET=""
 fi
@@ -55,4 +55,4 @@ FLAGS+=(
   "--repo=${IMAGE_REPO}"
 )
 
-go test ./integration/... "${FLAGS[@]}" "$@" 
+go test ./integration/... "${FLAGS[@]}" "$@"

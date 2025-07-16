@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2018 Google LLC
 #
@@ -16,10 +16,10 @@
 
 
 files=$(find . -name "*.go" | grep -v vendor/ | xargs gofmt -l -s)
-if [[ $files ]]; then
+if [[ -n "${files}" ]]; then
     echo "Gofmt errors in files:"
-    echo "$files"
+    echo "${files}"
     diff=$(find . -name "*.go" | grep -v vendor/ | xargs gofmt -d -s)
-    echo "$diff"
+    echo "${diff}"
     exit 1
 fi

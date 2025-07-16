@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2018 Google LLC
 #
@@ -15,8 +15,8 @@
 # limitations under the License.
 
 set -ex
-script_name=$0
+
 script_full_path=$(dirname "$0")
 export BENCHMARK=true
 export IMAGE_REPO="gcr.io/kaniko-test/benchmarks"
-./${script_full_path}/integration-test.sh
+./"${script_full_path}"/integration-test.sh

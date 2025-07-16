@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2018 Google LLC
 #
@@ -25,9 +25,9 @@ read VERSION
 MAKEFILE_VERSION=$(echo $VERSION | sed 's/^[v]//')
 
 # Extract major, minor, and build version numbers
-VERSION_MAJOR=$(echo $MAKEFILE_VERSION | cut -d. -f1)
-VERSION_MINOR=$(echo $MAKEFILE_VERSION | cut -d. -f2)
-VERSION_BUILD=$(echo $MAKEFILE_VERSION | cut -d. -f3)
+VERSION_MAJOR=$(echo "${MAKEFILE_VERSION}" | cut -d. -f1)
+VERSION_MINOR=$(echo "${MAKEFILE_VERSION}" | cut -d. -f2)
+VERSION_BUILD=$(echo "${MAKEFILE_VERSION}" | cut -d. -f3)
 
 echo "Processing (takes some time)..."
 
@@ -46,30 +46,30 @@ sed -e "s@{{PULL_REQUESTS}}@${PULL_REQS}@g" \
     -e "s@{{CONTRIBUTORS}}@${CONTRIBUTORS}@g" \
     -e "s@{{VERSION}}@${VERSION}@g" \
     -e "s@{{DATE}}@${DATE}@g" \
-    ${DIR}/release_notes/changelog_template.txt > $TEMP_CHANGELOG
+    ${DIR}/release_notes/changelog_template.txt > "${TEMP_CHANGELOG}"
 
 # Replace '|' with '\n' in temporary changelog
-sed 's/|/\n/g' $TEMP_CHANGELOG > $TEMP_CHANGELOG_FIXED
+sed 's/|/\n/g' "${TEMP_CHANGELOG}" > "${TEMP_CHANGELOG_FIXED}"
 
 # Prepend to CHANGELOG.md
-cat $TEMP_CHANGELOG_FIXED CHANGELOG.md > TEMP && mv TEMP CHANGELOG.md
+cat "${TEMP_CHANGELOG_FIXED}" CHANGELOG.md > TEMP && mv TEMP CHANGELOG.md
 
 echo "Prepended the following release information to CHANGELOG.md"
 echo ""
-cat  $TEMP_CHANGELOG_FIXED
+cat "${TEMP_CHANGELOG_FIXED}"
 
 # Optionally, clean up the fixed temporary changlog file
-rm $TEMP_CHANGELOG_FIXED
+rm "${TEMP_CHANGELOG_FIXED}"
 
 # Cleanup
-rm $TEMP_CHANGELOG
+rm "${TEMP_CHANGELOG}"
 
-echo "Updated Makefile for the new version: $VERSION"
+echo "Updated Makefile for the new version: ${VERSION}"
 # Update Makefile
 sed -i.bak \
-    -e "s|VERSION_MAJOR ?=.*|VERSION_MAJOR ?= $VERSION_MAJOR|" \
-    -e "s|VERSION_MINOR ?=.*|VERSION_MINOR ?= $VERSION_MINOR|" \
-    -e "s|VERSION_BUILD ?=.*|VERSION_BUILD ?= $VERSION_BUILD|" \
+    -e "s|VERSION_MAJOR ?=.*|VERSION_MAJOR ?= ${VERSION_MAJOR}|" \
+    -e "s|VERSION_MINOR ?=.*|VERSION_MINOR ?= ${VERSION_MINOR}|" \
+    -e "s|VERSION_BUILD ?=.*|VERSION_BUILD ?= ${VERSION_BUILD}|" \
     ./Makefile
 
 # Cleanup

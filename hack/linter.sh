@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2018 Google LLC
 #
@@ -19,7 +19,7 @@ set -e -o pipefail
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 BIN=${DIR}/bin
 
-if [ ! -x "${BIN}/golangci-lint" ]; then
+if [[ ! -x "${BIN}/golangci-lint" ]]; then
 	echo "Installing GolangCI-Lint"
 	"${DIR}/install_golint.sh" -b "${BIN}" v1.51.1
 fi

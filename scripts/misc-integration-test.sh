@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,17 +19,17 @@ set -e
 
 TESTS=$(./scripts/integration-test.sh -list=Test -mod=vendor)
 
-TESTS=$(echo $TESTS | tr ' ' '\n' | grep 'Test'| grep -v 'TestRun' | grep -v 'TestLayers' | grep -v 'TestK8s' | grep -v 'TestSnapshotBenchmark')
+TESTS=$(echo ${TESTS} | tr ' ' '\n' | grep 'Test'| grep -v 'TestRun' | grep -v 'TestLayers' | grep -v 'TestK8s' | grep -v 'TestSnapshotBenchmark')
 
 RUN_ARG=''
 count=0
-for i in $TESTS; do
-  if [ "$count" -gt "0" ]; then
-    RUN_ARG="$RUN_ARG|$i"
+for i in ${TESTS}; do
+  if [[ "${count}" -gt "0" ]]; then
+    RUN_ARG="${RUN_ARG}|${i}"
   else
-    RUN_ARG="$RUN_ARG$i"
+    RUN_ARG="${RUN_ARG}${i}"
   fi
   count=$((count+1))
 done
 
-echo $RUN_ARG
+echo "${RUN_ARG}"
