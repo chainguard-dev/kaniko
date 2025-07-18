@@ -41,7 +41,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-const org = "GoogleContainerTools"
+const org = "chainguard-dev"
 const repo = "kaniko"
 
 func main() {
