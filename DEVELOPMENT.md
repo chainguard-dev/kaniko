@@ -107,13 +107,13 @@ To run integration tests with your GCloud Storage, you will also need the follow
 Once this step done, you must override the project using environment variables:
 
 * `GCS_BUCKET` - The name of your GCS bucket
-* `IMAGE_REPO` - The path to your docker image repo
+* `IMAGE_REPO` - The path to your Docker image repo on your registry host
 
 This can be done as follows:
 
 ```shell
 export GCS_BUCKET="gs://<your bucket>"
-export IMAGE_REPO="gcr.io/somerepo"
+export IMAGE_REPO="YOUR-REGISTRY/YOUR-REPO"
 ```
 
 Login for both user and application credentials
@@ -166,9 +166,9 @@ of each run to that file location.
 ```shell
 docker run -v $(pwd):/workspace -v ~/.config:/root/.config \
 -e BENCHMARK_FILE=/workspace/benchmark_file \
-gcr.io/kaniko-project/executor:latest \
+<YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR> \
 --dockerfile=<path to Dockerfile> --context=/workspace \
---destination=gcr.io/my-repo/my-image
+--destination=<YOUR-REGISTRY>/<YOUR-REPO>/new-image
 ```
 Additionally, the integration tests can output benchmarking information to a `benchmarks` directory under the
 `integration` directory if the `BENCHMARK` environment variable is set to `true.`
@@ -182,7 +182,7 @@ If you are GCB builds are slow, you can check which phases in kaniko are bottlen
 To do this, add "BENCHMARK_ENV" to your cloudbuild.yaml like this.
 ```shell script
 steps:
-- name: 'gcr.io/kaniko-project/executor:latest'
+- name: '<YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR>'
   args:
   - --build-arg=NUM=${_COUNT}
   - --no-push

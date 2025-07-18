@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: kaniko
-    image: gcr.io/kaniko-project/executor:latest
+    image: <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR>
     args: ["--dockerfile=/workspace/dockerfile",
             "--context=dir://workspace",
             "--destination=<user-name>/<repo>"] # replace with your dockerhub account
