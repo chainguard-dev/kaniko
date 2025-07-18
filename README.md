@@ -166,6 +166,10 @@ container images as customer:
 * [kaniko-fips](https://images.chainguard.dev/directory/image/kaniko-fips)
 * [kaniko-warmer-fips](https://images.chainguard.dev/directory/image/kaniko-warmer-fips)
 
+Other available images:
+
+* [kaniko-build organization](https://github.com/kaniko-build)
+
 ## How does kaniko work?
 
 The kaniko executor image is responsible for building an image from a Dockerfile
