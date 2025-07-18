@@ -25,7 +25,7 @@ RUN [ "$(ls -ln /a.txt | tr -s ' ' | cut -d' ' -f 3)" = 1005 ] && \
 ADD b.txt /b.txt
 
 # Add remote file with and without chown
-ADD --chown=bob:1001 https://raw.githubusercontent.com/GoogleContainerTools/kaniko/master/README.md /r1.txt
+ADD --chown=bob:1001 https://raw.githubusercontent.com/chainguard-dev/kaniko/master/README.md /r1.txt
 RUN [ "$(ls -ln /r1.txt | tr -s ' ' | cut -d' ' -f 3)" = 1004 ] && \
   [ "$(ls -ln /r1.txt | tr -s ' ' | cut -d' ' -f 4)" = 1001 ]
-ADD https://raw.githubusercontent.com/GoogleContainerTools/kaniko/master/README.md /r2.txt
+ADD https://raw.githubusercontent.com/chainguard-dev/kaniko/master/README.md /r2.txt
