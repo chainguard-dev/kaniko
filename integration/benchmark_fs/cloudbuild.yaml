@@ -1,5 +1,5 @@
 steps:
-- name: 'gcr.io/kaniko-project/executor:latest'
+- name: '<YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR>'
   args:
   - --build-arg=NUM=${_COUNT}
   - --no-push

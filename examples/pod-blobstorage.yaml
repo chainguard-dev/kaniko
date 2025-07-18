@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: kaniko
-    image: gcr.io/kaniko-project/executor:latest
+    image: <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR>
     args: ["--dockerfile=<path to Dockerfile within the build context>",
             "--context=https://myaccount.blob.core.windows.net/container/path/to/context.tar.gz",
             "--destination=<registry for image push>"]

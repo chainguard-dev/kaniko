@@ -24,6 +24,7 @@ fi
 dockerfile=$1
 context=$2
 destination=$3
+executor_image="<YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR>"
 
 cache="false"
 if [[ -n "$4" ]]; then
@@ -38,13 +39,13 @@ if [[ ${destination} == *"gcr"* ]]; then
     docker run \
         -v "${HOME}"/.config/gcloud:/root/.config/gcloud \
         -v "${context}":/workspace \
-        gcr.io/kaniko-project/executor:latest \
+        ${executor_image} \
         --dockerfile "${dockerfile}" --destination "${destination}" --context dir:///workspace/ \
         --cache="${cache}"
 else
     docker run \
         -v "${context}":/workspace \
-        gcr.io/kaniko-project/executor:latest \
+        ${executor_image} \
         --dockerfile "${dockerfile}" --destination "${destination}" --context dir:///workspace/ \
         --cache="${cache}"
 fi

@@ -304,9 +304,9 @@ Input data, using docker:
 
 ```shell
 echo -e 'FROM alpine \nRUN echo "created from standard input"' > Dockerfile | tar -cf - Dockerfile | gzip -9 | docker run \
-  --interactive -v $(pwd):/workspace gcr.io/kaniko-project/executor:latest \
+  --interactive -v $(pwd):/workspace <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR> \
   --context tar://stdin \
-  --destination=<gcr.io/$project/$image:$tag>
+  --destination=<YOUR-REGISTRY>/$project/$image:$tag>
 ```
 
 Complete example of how to interactively run kaniko with `.tar.gz` Standard
@@ -316,20 +316,20 @@ completely dockerless:
 ```shell
 echo -e 'FROM alpine \nRUN echo "created from standard input"' > Dockerfile | tar -cf - Dockerfile | gzip -9 | kubectl run kaniko \
 --rm --stdin=true \
---image=gcr.io/kaniko-project/executor:latest --restart=Never \
+--image=<YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR> --restart=Never \
 --overrides='{
   "apiVersion": "v1",
   "spec": {
     "containers": [
       {
         "name": "kaniko",
-        "image": "gcr.io/kaniko-project/executor:latest",
+        "image": "<YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR>",
         "stdin": true,
         "stdinOnce": true,
         "args": [
           "--dockerfile=Dockerfile",
           "--context=tar://stdin",
-          "--destination=gcr.io/my-repo/my-image"
+          "--destination<YOUR-REGISTRY>/<YOUR-REPO>/my-image"
         ],
         "volumeMounts": [
           {
@@ -411,11 +411,11 @@ metadata:
 spec:
   containers:
     - name: kaniko
-      image: gcr.io/kaniko-project/executor:latest
+      image: <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR>
       args:
         - "--dockerfile=<path to Dockerfile within the build context>"
         - "--context=gs://<GCS bucket>/<path to .tar.gz>"
-        - "--destination=<gcr.io/$PROJECT/$IMAGE:$TAG>"
+        - "--destination=<<YOUR-REGISTRY>/$PROJECT/$IMAGE:$TAG>"
       volumeMounts:
         - name: kaniko-secret
           mountPath: /secret
@@ -442,9 +442,9 @@ a container is running in gVisor.
 
 ```shell
 docker run --runtime=runsc -v $(pwd):/workspace -v ~/.config:/root/.config \
-gcr.io/kaniko-project/executor:latest \
+<YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR> \
 --dockerfile=<path to Dockerfile> --context=/workspace \
---destination=gcr.io/my-repo/my-image --force
+--destination=<YOUR-REGISTRY>/<YOUR-REPO>/my-image --force
 ```
 
 We pass in `--runtime=runsc` to use gVisor. This example mounts the current
@@ -461,12 +461,12 @@ To run kaniko in GCB, add it to your build config as a build step:
 
 ```yaml
 steps:
-  - name: gcr.io/kaniko-project/executor:latest
+  - name: <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR>
     args:
       [
         "--dockerfile=<path to Dockerfile within the build context>",
         "--context=dir://<path to build context>",
-        "--destination=<gcr.io/$PROJECT/$IMAGE:$TAG>",
+        "--destination=<<YOUR-REGISTRY>/$PROJECT/$IMAGE:$TAG>",
       ]
 ```
 
