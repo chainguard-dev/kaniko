@@ -143,9 +143,15 @@ one down and migrate to that.
 ## Community
 
 If you are interested in contributing to kaniko, learn more from our
-[development](DEVELOPMENT.md) and [contributing](CONTRIBUTING.md) guides and
-find other community members on [#kaniko on Kubernetes
-Slack](https://kubernetes.slack.com/messages/CQDCHGX7Y/)
+[development](DEVELOPMENT.md) and [contributing](CONTRIBUTING.md) guides.
+
+For any community discussion [participate in open
+issues](https://github.com/chainguard-dev/kaniko/issues) or [file a new
+issue](https://github.com/chainguard-dev/kaniko/issues/new/choose).
+
+Some community members can be found on [#kaniko on Kubernetes
+Slack](https://kubernetes.slack.com/messages/CQDCHGX7Y/) but there is no active
+monitoring, regular availability, or access to older discussions.
 
 ## Releases
 
@@ -1488,7 +1494,7 @@ changes to a file are made and when the `mtime` is updated. This means:
 
 _Note that these issues are currently theoretical only. If you see this issue
 occur, please
-[open an issue](https://github.com/GoogleContainerTools/kaniko/issues)._
+[open an issue](https://github.com/chainguard-dev/kaniko/issues)._
 
 ### Dockerfile commands `--chown` support
 Kaniko currently supports `COPY --chown` and `ADD --chown` Dockerfile command. It does not support `RUN --chown`.
