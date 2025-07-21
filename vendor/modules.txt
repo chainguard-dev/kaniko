@@ -207,7 +207,7 @@ github.com/ProtonMail/go-crypto/openpgp/x448
 # github.com/agext/levenshtein v1.2.3
 ## explicit
 github.com/agext/levenshtein
-# github.com/aws/aws-sdk-go-v2 v1.36.5
+# github.com/aws/aws-sdk-go-v2 v1.36.6
 ## explicit; go 1.22
 github.com/aws/aws-sdk-go-v2/aws
 github.com/aws/aws-sdk-go-v2/aws/arn
