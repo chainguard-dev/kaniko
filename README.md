@@ -497,7 +497,7 @@ For example, when using gcloud and GCR you could run kaniko as follows:
 docker run \
     -v "$HOME"/.config/gcloud:/root/.config/gcloud \
     -v /path/to/context:/workspace \
-    gcr.io/kaniko-project/executor:latest \
+    <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR> \
     --dockerfile /workspace/Dockerfile \
     --destination "gcr.io/$PROJECT_ID/$IMAGE_NAME:$TAG" \
     --context dir:///workspace/
@@ -546,12 +546,12 @@ flag. If this flag isn't provided, a cached repo will be inferred from the
 
 kaniko can cache images in a local directory that can be volume mounted into the
 kaniko pod. To do so, the cache must first be populated, as it is read-only. We
-provide a kaniko cache warming image at `gcr.io/kaniko-project/warmer`:
+provide a kaniko cache warming image:
 
 ```shell
-docker run -v $(pwd):/workspace gcr.io/kaniko-project/warmer:latest --cache-dir=/workspace/cache --image=<image to cache> --image=<another image to cache>
-docker run -v $(pwd):/workspace gcr.io/kaniko-project/warmer:latest --cache-dir=/workspace/cache --dockerfile=<path to dockerfile>
-docker run -v $(pwd):/workspace gcr.io/kaniko-project/warmer:latest --cache-dir=/workspace/cache --dockerfile=<path to dockerfile> --build-arg version=1.19
+docker run -v $(pwd):/workspace <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-WARMER> --cache-dir=/workspace/cache --image=<image to cache> --image=<another image to cache>
+docker run -v $(pwd):/workspace <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-WARMER> --cache-dir=/workspace/cache --dockerfile=<path to dockerfile>
+docker run -v $(pwd):/workspace <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-WARMER> --cache-dir=/workspace/cache --dockerfile=<path to dockerfile> --build-arg version=1.19
 ```
 
 `--image` can be specified for any number of desired images. `--dockerfile` can
@@ -594,7 +594,7 @@ generated base64 string
 Run kaniko with the `config.json` inside `/kaniko/.docker/config.json`
 
 ```shell
-docker run -ti --rm -v `pwd`:/workspace -v `pwd`/config.json:/kaniko/.docker/config.json:ro gcr.io/kaniko-project/executor:latest --dockerfile=Dockerfile --destination=yourimagename
+docker run -ti --rm -v `pwd`:/workspace -v `pwd`/config.json:/kaniko/.docker/config.json:ro <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR> --dockerfile=Dockerfile --destination=yourimagename
 ```
 
 #### Pushing to Google GCR
@@ -613,7 +613,7 @@ steps:
 
 ```shell
 docker run -ti --rm -e GOOGLE_APPLICATION_CREDENTIALS=/kaniko/config.json \
--v `pwd`:/workspace -v `pwd`/kaniko-secret.json:/kaniko/config.json:ro gcr.io/kaniko-project/executor:latest \
+-v `pwd`:/workspace -v `pwd`/kaniko-secret.json:/kaniko/config.json:ro <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR> \
 --dockerfile=Dockerfile --destination=yourimagename
 ```
 
@@ -688,7 +688,7 @@ metadata:
 spec:
   containers:
     - name: kaniko
-      image: gcr.io/kaniko-project/executor:latest
+      image: <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR>
       args:
         - "--dockerfile=<path to Dockerfile within the build context>"
         - "--context=s3://<bucket name>/<path to .tar.gz>"
@@ -763,7 +763,7 @@ metadata:
 spec:
   containers:
     - name: kaniko
-      image: gcr.io/kaniko-project/executor:latest
+      image: <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR>
       args:
         - "--dockerfile=<path to Dockerfile within the build context>"
         - "--context=s3://<bucket name>/<path to .tar.gz>"
@@ -810,7 +810,7 @@ For example, for Artifactory cloud users, the docker registry should be:
 
 Run kaniko with the `config.json` inside `/kaniko/.docker/config.json`
 
-    docker run -ti --rm -v `pwd`:/workspace -v `pwd`/config.json:/kaniko/.docker/config.json:ro gcr.io/kaniko-project/executor:latest --dockerfile=Dockerfile --destination=yourimagename
+    docker run -ti --rm -v `pwd`:/workspace -v `pwd`/config.json:/kaniko/.docker/config.json:ro <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR> --dockerfile=Dockerfile --destination=yourimagename
 
 After the image is uploaded, using the JFrog CLI, you can
 [collect](https://www.jfrog.com/confluence/display/CLI/CLI+for+JFrog+Artifactory#CLIforJFrogArtifactory-PushingDockerImagesUsingKaniko)
@@ -1217,7 +1217,7 @@ the kaniko executor image along with a busybox shell to enter.
 You can launch the debug image with a shell entrypoint:
 
 ```shell
-docker run -it --entrypoint=/busybox/sh gcr.io/kaniko-project/executor:debug
+docker run -it --entrypoint=/busybox/sh <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR-DEBUG>
 ```
 
 ## Security
@@ -1262,7 +1262,7 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE9aAfAcgAxIFMTstJUv8l/AMqnSKw
 P+vLu3NnnBDHCfREQpV/AJuiZ1UtgGpFpHlJLCNPmFkzQTnfyN5idzNl6Q==
 -----END PUBLIC KEY-----
 
-$ cosign verify -key ./cosign.pub gcr.io/kaniko-project/executor:latest
+$ cosign verify -key ./cosign.pub <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR>
 ```
 
 ## Kaniko Builds - Profiling
@@ -1343,7 +1343,7 @@ build-container:
     # run each build on a suitable, preconfigured runner (must match the target architecture)
     - runner-${ARCH}
   image:
-    name: gcr.io/kaniko-project/executor:debug
+    name: <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-EXECUTOR-DEBUG>
     entrypoint: [""]
   script:
     # build the container image for the current arch using kaniko
