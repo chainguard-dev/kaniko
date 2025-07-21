@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: kaniko-warmer
-    image: gcr.io/kaniko-project/warmer:latest
+    image: <YOUR-REGISTRY>/<YOUR-REPO>/<KANIKO-WARMER>
     args: ["--cache-dir=/cache",
            "--image=gcr.io/google-appengine/debian9"]
     volumeMounts:
