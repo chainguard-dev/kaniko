@@ -17,6 +17,7 @@ limitations under the License.
 package buildcontext
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -55,13 +56,46 @@ func TestBuildWithHttpsTar(t *testing.T) {
 			server := httptest.NewServer(tcase.serverHandler)
 			defer server.Close()
 
-			context := &HTTPSTar{
+			context := &HTTPContext{
 				context: server.URL + "/data.tar.gz",
 			}
 
 			_, err := context.UnpackTarFromBuildContext()
 			if err == nil {
 				t.Fatalf("Error expected but not returned: %s", err)
+			}
+		})
+	}
+}
+
+func TestGetBuildContextHttpPrefix(t *testing.T) {
+	tests := []struct {
+		name        string
+		srcContext  string
+		expectedType string
+	}{
+		{
+			name:        "http prefix",
+			srcContext:  "http://example.com/context.tar.gz",
+			expectedType: "*buildcontext.HTTPContext",
+		},
+		{
+			name:        "https prefix",
+			srcContext:  "https://example.com/context.tar.gz",
+			expectedType: "*buildcontext.HTTPContext",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			bc, err := GetBuildContext(test.srcContext, BuildOptions{})
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			
+			actualType := fmt.Sprintf("%T", bc)
+			if actualType != test.expectedType {
+				t.Errorf("Expected type %s, got %s", test.expectedType, actualType)
 			}
 		})
 	}
