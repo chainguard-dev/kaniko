@@ -366,6 +366,11 @@ func ExtractFile(dest string, hdr *tar.Header, cleanedName string, tr io.Reader)
 		if err := MkdirAllWithPermissions(path, mode, int64(uid), int64(gid)); err != nil {
 			return err
 		}
+		// For existing directories, MkdirAll doesn't change the permissions, so run Chmod
+		// To force permissions into what is configured in the tarball
+		if err = os.Chmod(path, mode); err != nil {
+			return err
+		}
 
 	case tar.TypeLink:
 		logrus.Tracef("Link from %s to %s", hdr.Linkname, path)
@@ -682,13 +687,16 @@ func CopyDir(src, dest string, context FileContext, uid, gid int64, chmod fs.Fil
 		if fi.IsDir() {
 			logrus.Tracef("Creating directory %s", destPath)
 
-			mode := chmod
-			if useDefaultChmod {
-				mode = fi.Mode()
-			}
 			uid, gid := DetermineTargetFileOwnership(fi, uid, gid)
-			if err := MkdirAllWithPermissions(destPath, mode, uid, gid); err != nil {
+			if err := MkdirAllWithPermissions(destPath, fi.Mode(), uid, gid); err != nil {
 				return nil, err
+			}
+			if !useDefaultChmod {
+				// For existing directories, MkdirAll doesn't change the permissions, so run Chmod
+				// To force permissions into what is configured via the chmod parameter
+				if err = os.Chmod(destPath, chmod); err != nil {
+					return nil, err
+				}
 			}
 		} else if IsSymlink(fi) {
 			// If file is a symlink, we want to create the same relative symlink
@@ -854,7 +862,13 @@ func MkdirAllWithPermissions(path string, mode os.FileMode, uid, gid int64) erro
 		return errors.Wrapf(err, "error calling stat on %s.", path)
 	}
 
-	if err := os.MkdirAll(path, mode); err != nil {
+	// mkdir respects the process' umask
+	// so we can't copy the correct permissions from source
+	// if umask is set to anything other than 0
+	umask := syscall.Umask(0)
+	err = os.MkdirAll(path, mode)
+	syscall.Umask(umask)
+	if err != nil {
 		return err
 	}
 	if uid > math.MaxUint32 || gid > math.MaxUint32 {
@@ -869,9 +883,7 @@ func MkdirAllWithPermissions(path string, mode os.FileMode, uid, gid int64) erro
 	if err := os.Chown(path, int(uid), int(gid)); err != nil {
 		return err
 	}
-	// In some cases, MkdirAll doesn't change the permissions, so run Chmod
-	// Must chmod after chown because chown resets the file mode.
-	return os.Chmod(path, mode)
+	return nil
 }
 
 func setFilePermissions(path string, mode os.FileMode, uid, gid int) error {
