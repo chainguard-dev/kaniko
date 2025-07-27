@@ -49,10 +49,12 @@ out/executor: $(GO_FILES)
 out/warmer: $(GO_FILES)
 	GOARCH=$(GOARCH) GOOS=$(GOOS) CGO_ENABLED=0 go build -ldflags $(GO_LDFLAGS) -o $@ $(WARMER_PACKAGE)
 
-.PHONY: install-container-diff
-install-container-diff:
-	@ curl -LO https://github.com/GoogleContainerTools/container-diff/releases/download/v0.17.0/container-diff-$(GOOS)-amd64 && \
-		chmod +x container-diff-$(GOOS)-amd64 && sudo mv container-diff-$(GOOS)-amd64 /usr/local/bin/container-diff
+.PHONY: install-diffoci
+install-diffoci:
+	@ git clone https://github.com/mzihlmann/diffoci.git && \
+		cd diffoci/cmd/diffoci && \
+		go mod vendor && \
+		go install
 
 .PHONY: k3s-setup
 k3s-setup:
