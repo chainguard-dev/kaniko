@@ -5,11 +5,20 @@ updates:
     directory: /
     schedule:
       interval: daily
+    groups:
+      gomod:
+        update-types:
+          - "patch"
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: daily
+    groups:
+      actions:
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: docker
     directory: /deploy
