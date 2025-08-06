@@ -69,8 +69,9 @@ var argsMap = map[string][]string{
 
 // Environment to build Dockerfiles with, used for both docker and kaniko builds
 var envsMap = map[string][]string{
-	"Dockerfile_test_arg_secret":    {"SSH_PRIVATE_KEY=ThEPriv4t3Key"},
-	"Dockerfile_test_copyadd_chmod": {"DOCKER_BUILDKIT=1"},
+	"Dockerfile_test_arg_secret":                 {"SSH_PRIVATE_KEY=ThEPriv4t3Key"},
+	"Dockerfile_test_copyadd_chmod":              {"DOCKER_BUILDKIT=1"},
+	"Dockerfile_test_multistage_args_issue_1911": {"DOCKER_BUILDKIT=1"},
 }
 
 // Arguments to build Dockerfiles with when building with docker
@@ -87,6 +88,26 @@ var additionalKanikoFlagsMap = map[string][]string{
 	"Dockerfile_test_maintainer":             {"--single-snapshot"},
 	"Dockerfile_test_target":                 {"--target=second"},
 	"Dockerfile_test_snapshotter_ignorelist": {"--use-new-run=true", "-v=trace"},
+}
+
+// Arguments to diffoci when comparing dockerfiles
+var diffArgsMap = map[string][]string{
+	// /root/.config 0x1c0 0x1ed
+	// I suspect the issue is that /root/.config pre-exists,
+	// it's where we store the docker credentials.
+	"TestWithContext/test_with_context_issue-1020": {"--extra-ignore-files=root/.config/"},
+	// docker is wrong. we do copy the symlink correctly.
+	"TestRun/test_Dockerfile_test_copy_symlink": {"--extra-ignore-files=workdirAnother/relative_link"},
+	"TestRun/test_Dockerfile_test_multistage":   {"--extra-ignore-files=new"},
+	// docker is wrong. we set permissions to 777 as instructed, they set to 755
+	"TestRun/test_Dockerfile_test_copyadd_chmod": {"--extra-ignore-files=dir777/"},
+	// WORKDIR is not cached https://github.com/GoogleContainerTools/kaniko/issues/3340
+	"TestCache/test_cache_Dockerfile_test_cache_install":         {"--semantic"},
+	"TestCache/test_oci_cache_Dockerfile_test_cache_install_oci": {"--semantic"},
+	// empty RUN statements are treated differently whether they are built from scratch or from cache
+	// https://github.com/GoogleContainerTools/kaniko/pull/3496
+	"TestCache/test_cache_Dockerfile_test_cache":         {"--semantic", "--extra-ignore-layer-length-mismatch"},
+	"TestCache/test_oci_cache_Dockerfile_test_cache_oci": {"--semantic", "--extra-ignore-layer-length-mismatch"},
 }
 
 // output check to do when building with kaniko
