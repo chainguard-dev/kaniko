@@ -58,5 +58,5 @@ jobs:
           driver: docker-container
           driver-opts: network=host # Allows buildx to access the local registry.
 
-      - run: make install-container-diff k3s-setup
+      - run: make install-diffoci k3s-setup
       - run: make ${{ matrix.make-target }}

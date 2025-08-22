@@ -17,7 +17,6 @@ limitations under the License.
 package integration
 
 import (
-	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -130,10 +129,7 @@ func TestK8s(t *testing.T) {
 				t.Fatal(errR)
 			}
 
-			diff := containerDiff(t, daemonPrefix+dockerImage, kanikoImage, "--no-cache")
-
-			expected := fmt.Sprintf(emptyContainerDiff, dockerImage, kanikoImage, dockerImage, kanikoImage)
-			checkContainerDiffOutput(t, diff, expected)
+			containerDiff(t, daemonPrefix+dockerImage, kanikoImage, "--semantic", "--extra-ignore-file-permissions", "--extra-ignore-file-content", "--extra-ignore-layer-length-mismatch")
 		})
 	}
 

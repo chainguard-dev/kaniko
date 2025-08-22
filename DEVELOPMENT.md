@@ -49,7 +49,7 @@ Images built with kaniko should be no different from images built elsewhere.
 While you iterate on kaniko, you can verify images built with kaniko by:
 
 1. Build the image using another system, such as `docker build`
-2. Use [`container-diff`](https://github.com/GoogleContainerTools/container-diff) to diff the images
+2. Use [`diffoci`](https://github.com/mzihlmann/diffoci) to diff the images
 
 ## Testing kaniko
 
@@ -90,7 +90,7 @@ These tests will be kicked off by [reviewers](#reviews) for submitted PRs using 
 
 In either case, you will need the following tools:
 
-* [`container-diff`](https://github.com/GoogleContainerTools/container-diff#installation)
+* [`diffoci`](https://github.com/mzihlmann/diffoci#installation)
 
 #### GCloud
 

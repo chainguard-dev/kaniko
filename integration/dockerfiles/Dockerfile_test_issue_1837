@@ -1,6 +1,9 @@
 FROM registry.access.redhat.com/ubi8/ubi:8.2 AS base
 # Install ping
-RUN yum --disableplugin=subscription-manager install -y iputils
+RUN dnf install -y iputils \
+    && dnf clean all \
+    && rm -rf /var/cache/dnf /var/log/dnf* /var/log/rhsm
+
 RUN setcap cap_net_raw+ep /bin/ping || exit 1
 
 FROM base

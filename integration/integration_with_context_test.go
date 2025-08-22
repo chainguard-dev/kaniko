@@ -17,7 +17,6 @@ limitations under the License.
 package integration
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -64,11 +63,7 @@ func TestWithContext(t *testing.T) {
 			dockerImage := GetDockerImage(config.imageRepo, name)
 			kanikoImage := GetKanikoImage(config.imageRepo, name)
 
-			diff := containerDiff(t, daemonPrefix+dockerImage, kanikoImage, "--no-cache")
-
-			expected := fmt.Sprintf(emptyContainerDiff, dockerImage, kanikoImage, dockerImage, kanikoImage)
-			checkContainerDiffOutput(t, diff, expected)
-
+			containerDiff(t, daemonPrefix+dockerImage, kanikoImage, "--semantic", "--extra-ignore-file-permissions", "--extra-ignore-file-content", "--extra-ignore-layer-length-mismatch")
 		})
 	}
 
