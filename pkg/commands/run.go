@@ -63,7 +63,18 @@ func runCommandInExec(config *v1.Config, buildArgs *dockerfile.BuildArgs, cmdRun
 			shell = append(shell, "/bin/sh", "-c")
 		}
 
-		newCommand = append(shell, strings.Join(cmdRun.CmdLine, " "))
+		// Append the heredoc script to the shell command
+		if len(cmdRun.ShellDependantCmdLine.Files) > 0 {
+			var finalHeredoc []string
+			for _, data := range cmdRun.ShellDependantCmdLine.Files {
+				finalHeredoc = append(finalHeredoc, data.Data)
+			}
+			shell = append(shell, strings.Join(finalHeredoc, "\n"))
+		} else {
+			shell = append(shell, strings.Join(cmdRun.CmdLine, " "))
+		}
+
+		newCommand = shell
 	} else {
 		newCommand = cmdRun.CmdLine
 		// Find and set absolute path of executable by setting PATH temporary
