@@ -63,13 +63,22 @@ func runCommandInExec(config *v1.Config, buildArgs *dockerfile.BuildArgs, cmdRun
 			shell = append(shell, "/bin/sh", "-c")
 		}
 
-		// Append the heredoc script to the shell command
-		if len(cmdRun.ShellDependantCmdLine.Files) > 0 {
-			var finalHeredoc []string
-			for _, data := range cmdRun.ShellDependantCmdLine.Files {
-				finalHeredoc = append(finalHeredoc, data.Data)
+		// Append the heredoc script to the shell command if files exist
+		if len(cmdRun.Files) > 0 {
+			var heredocData []string
+			for _, file := range cmdRun.Files {
+				content := file.Data
+				if len(strings.Fields(cmdRun.CmdLine[0])) > 1 {
+					content += file.Name + "\n"
+				}
+				heredocData = append(heredocData, content)
 			}
-			shell = append(shell, strings.Join(finalHeredoc, "\n"))
+
+			if strings.HasPrefix(cmdRun.CmdLine[0], "<<") {
+				shell = append(shell, strings.Join(heredocData, "\n"))
+			} else {
+				shell = append(shell, strings.Join(cmdRun.CmdLine, " ")+"\n"+strings.Join(heredocData, ""))
+			}
 		} else {
 			shell = append(shell, strings.Join(cmdRun.CmdLine, " "))
 		}
