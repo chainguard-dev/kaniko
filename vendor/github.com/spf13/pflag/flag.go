@@ -143,6 +143,11 @@ type ParseErrorsAllowlist struct {
 	UnknownFlags bool
 }
 
+// ParseErrorsWhitelist defines the parsing errors that can be ignored.
+//
+// Deprecated: use [ParseErrorsAllowlist] instead. This type will be removed in a future release.
+type ParseErrorsWhitelist = ParseErrorsAllowlist
+
 // NormalizedName is a flag name that has been normalized according to rules
 // for the FlagSet (e.g. making '-' and '_' equivalent).
 type NormalizedName string
@@ -160,6 +165,11 @@ type FlagSet struct {
 
 	// ParseErrorsAllowlist is used to configure an allowlist of errors
 	ParseErrorsAllowlist ParseErrorsAllowlist
+
+	// ParseErrorsAllowlist is used to configure an allowlist of errors.
+	//
+	// Deprecated: use [FlagSet.ParseErrorsAllowlist] instead. This field will be removed in a future release.
+	ParseErrorsWhitelist ParseErrorsAllowlist
 
 	name              string
 	parsed            bool
@@ -984,6 +994,8 @@ func (f *FlagSet) parseLongArg(s string, args []string, fn parseFunc) (a []strin
 		case name == "help":
 			f.usage()
 			return a, ErrHelp
+		case f.ParseErrorsWhitelist.UnknownFlags:
+			fallthrough
 		case f.ParseErrorsAllowlist.UnknownFlags:
 			// --unknown=unknownval arg ...
 			// we do not want to lose arg in this case
@@ -1042,6 +1054,8 @@ func (f *FlagSet) parseSingleShortArg(shorthands string, args []string, fn parse
 			f.usage()
 			err = ErrHelp
 			return
+		case f.ParseErrorsWhitelist.UnknownFlags:
+			fallthrough
 		case f.ParseErrorsAllowlist.UnknownFlags:
 			// '-f=arg arg ...'
 			// we do not want to lose arg in this case
@@ -1173,7 +1187,7 @@ func (f *FlagSet) Parse(arguments []string) error {
 		case ContinueOnError:
 			return err
 		case ExitOnError:
-			if errors.Is(err, ErrHelp) {
+			if err == ErrHelp {
 				os.Exit(0)
 			}
 			fmt.Fprintln(f.Output(), err)
@@ -1202,7 +1216,7 @@ func (f *FlagSet) ParseAll(arguments []string, fn func(flag *Flag, value string)
 		case ContinueOnError:
 			return err
 		case ExitOnError:
-			if errors.Is(err, ErrHelp) {
+			if err == ErrHelp {
 				os.Exit(0)
 			}
 			fmt.Fprintln(f.Output(), err)
