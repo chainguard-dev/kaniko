@@ -1,0 +1,11 @@
+FROM ubuntu
+
+# Fails on main@1d2bff5 before #3393:
+# When we COPY files into an existing folder
+# kaniko will not only copy the permissions from the context
+# onto the newly created files and folders. But will
+# also modify the permissions on the top level folder, even if it pre-exists.
+# This is aberrant behaviour, other build-tools persist the permissions.
+# In this specific case this leads to build-failure as sticky bit is lost on /tmp
+COPY ./ tmp
+RUN apt-get update && apt-get install -y curl
