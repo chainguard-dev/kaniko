@@ -851,8 +851,6 @@ github.com/moby/locker
 ## explicit; go 1.19
 github.com/moby/patternmatcher
 github.com/moby/patternmatcher/ignorefile
-# github.com/moby/profiles/seccomp v0.1.0
-## explicit; go 1.23.0
 # github.com/moby/sys/atomicwriter v0.1.0
 ## explicit; go 1.18
 github.com/moby/sys/atomicwriter
@@ -981,7 +979,7 @@ github.com/spf13/afero/mem
 # github.com/spf13/cast v1.6.0
 ## explicit; go 1.19
 github.com/spf13/cast
-# github.com/spf13/cobra v1.9.2-0.20250831231508-51d675196729
+# github.com/spf13/cobra v1.10.1
 ## explicit; go 1.15
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.10
