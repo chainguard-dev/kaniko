@@ -125,6 +125,10 @@ func TestGetContainerRuntime(t *testing.T) {
 2:perf_event:/
 1:name=systemd:/machine.slice/machine-rkt\x2dbfb7d57e\x2d80ff\x2d4ef8\x2db602\x2d9b907b3f3a38.scope/system.slice/debian.service`,
 		},
+		"cgroup v2": {
+			expectedRuntime: RuntimeNotFound,
+			input:           `0::/`,
+		},
 	}
 
 	for key, tc := range testcases {
