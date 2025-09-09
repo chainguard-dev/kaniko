@@ -1,0 +1,18 @@
+FROM debian AS base
+RUN apt-get update \
+    && apt-get install -y \
+        libcap2-bin \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN touch /blubb
+RUN setcap "cap_net_raw+ep" /blubb
+
+FROM debian
+
+RUN apt-get update \
+    && apt-get install -y \
+        libcap2-bin \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=base /blubb /
+RUN getcap /blubb
