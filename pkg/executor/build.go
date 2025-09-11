@@ -180,6 +180,7 @@ func initConfig(img partial.WithConfigFile, opts *config.KanikoOptions) (*v1.Con
 		}
 	}
 
+
 	return imageConfig, nil
 }
 
