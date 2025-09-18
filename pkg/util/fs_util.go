@@ -679,7 +679,14 @@ func CopyDir(src, dest string, context FileContext, uid, gid int64, chmod fs.Fil
 			return nil, errors.Wrap(err, "copying dir")
 		}
 		destPath := filepath.Join(dest, file)
-		if fi.IsDir() {
+		if file == "." {
+			logrus.Tracef("Creating directory %s", destPath)
+
+			uid, gid := DetermineTargetFileOwnership(fi, uid, gid)
+			if err := MkdirAllWithPermissions(destPath, 0755, uid, gid); err != nil {
+				return nil, err
+			}
+		} else if fi.IsDir() {
 			logrus.Tracef("Creating directory %s", destPath)
 
 			mode := chmod
