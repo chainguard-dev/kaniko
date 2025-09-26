@@ -41,6 +41,7 @@ const (
 	S3BuildContextPrefix       = "s3://"
 	LocalDirBuildContextPrefix = "dir://"
 	GitBuildContextPrefix      = "git://"
+	HTTPBuildContextPrefix     = "http://"
 	HTTPSBuildContextPrefix    = "https://"
 
 	HOME = "HOME"

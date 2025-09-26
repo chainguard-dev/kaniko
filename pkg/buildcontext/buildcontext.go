@@ -58,14 +58,16 @@ func GetBuildContext(srcContext string, opts BuildOptions) (BuildContext, error)
 			return &Dir{context: context}, nil
 		case constants.GitBuildContextPrefix:
 			return &Git{context: context, opts: opts}, nil
+		case constants.HTTPBuildContextPrefix:
+			return &HTTPContext{context: srcContext}, nil
 		case constants.HTTPSBuildContextPrefix:
 			if util.ValidAzureBlobStorageHost(srcContext) {
 				return &AzureBlob{context: srcContext}, nil
 			}
-			return &HTTPSTar{context: srcContext}, nil
+			return &HTTPContext{context: srcContext}, nil
 		case TarBuildContextPrefix:
 			return &Tar{context: context}, nil
 		}
 	}
-	return nil, errors.New("unknown build context prefix provided, please use one of the following: gs://, dir://, tar://, s3://, git://, https://")
+	return nil, errors.New("unknown build context prefix provided, please use one of the following: gs://, dir://, tar://, s3://, git://, http://, https://")
 }
