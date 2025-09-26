@@ -145,11 +145,11 @@ def get_files(extensions):
 def get_regexs():
     regexs = {}
     # Search for "YEAR" which exists in the boilerplate, but shouldn't in the real thing
-    regexs["year"] = re.compile( 'YEAR' )
+    regexs["year"] = re.compile(r'YEAR')
     # dates can be any year [2000-2099] company holder names can be anything
-    regexs["date"] = re.compile( '(20\d\d)' )
+    regexs["date"] = re.compile(r'(20\d\d)')
     # strip // go:build \n\n build constraints
-    regexs["go_build_constraints_go"] = re.compile(r"^(//go\:build.*)+\n", re.MULTILINE)
+    regexs["go_build_constraints_go"] = re.compile(r"^(?://go:build[^\n]*\n)+", re.MULTILINE)
     # strip // +build \n\n build constraints
     regexs["go_build_constraints"] = re.compile(r"^(// \+build.*\n)+\n", re.MULTILINE)
     # strip #!.* from shell scripts
