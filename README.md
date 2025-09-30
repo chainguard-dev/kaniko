@@ -134,11 +134,7 @@ Dan,](https://www.chainguard.dev/unchained/fork-yeah-were-bringing-kaniko-back)
 to [chainguard-dev/kaniko](https://github.com/chainguard-dev/kaniko) to continue
 upkeep with security patches and maintenance of the project.
 
-No major feature work is planned, while bug fixes and other minor contributions
-are welcome. 
-
-If another active and community-supported fork emerges, we'll happily shut this
-one down and migrate to that.
+No major feature work is planned.
 
 ## Community
 
