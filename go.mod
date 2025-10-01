@@ -21,7 +21,7 @@ require (
 	github.com/google/slowjam v1.1.2
 	github.com/karrick/godirwalk v1.17.0
 	github.com/minio/highwayhash v1.0.3
-	github.com/moby/buildkit v0.24.0
+	github.com/moby/buildkit v0.25.0
 	github.com/otiai10/copy v1.14.1
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
@@ -76,7 +76,7 @@ require (
 	github.com/containerd/continuity v0.4.5 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.16.3 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
-	github.com/docker/cli v28.3.3+incompatible // indirect
+	github.com/docker/cli v28.4.0+incompatible // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.3 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
