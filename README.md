@@ -44,6 +44,7 @@ expect - see [Known Issues](#known-issues).
       - [Running kaniko in gVisor](#running-kaniko-in-gvisor)
       - [Running kaniko in Google Cloud Build](#running-kaniko-in-google-cloud-build)
       - [Running kaniko in Docker](#running-kaniko-in-docker)
+    - [Bootstrapping Kaniko](#bootstrapping-kaniko)
     - [Caching](#caching)
       - [Caching Layers](#caching-layers)
       - [Caching Base Images](#caching-base-images)
@@ -517,6 +518,53 @@ destination:
 ```shell
 ./run_in_docker.sh /workspace/Dockerfile /home/user/kaniko-project gcr.io/$PROJECT_ID/$TAG
 ```
+
+### Bootstrapping Kaniko
+Kaniko's approach to buliding docker images is unique. It doesn't build up and snapshot an image in a separate container, instead it will build up and snapshot the image in the container where kaniko is installed. The benefit is that kaniko can run without any privileges, because it's not actually using any containerization technologies, the downside is that sometimes builds can yield surprising results - bootstrapping kaniko image with kaniko builder is one such case. 
+
+The good news is, it's all technically possible, but it's a bit more involved than building other images.
+
+The first problem we face is that the kaniko binaries are installed in `/kaniko` directory. Which means that this directory must also be ignored during snapshots, less we would leak our build tool into any image we produce. But this also means that kaniko by default can't build a kaniko image with the binaries installed in `/kaniko` directory. Luckily there is an override for that, that allows us to move all the binaries to a different location before the build ie. `--kaniko-dir=/kaniko2`.
+
+The second problem only affects build using the `debug` image, ie. gitlab-runner. The shell that is spawned in the debug image is in `/busybox`, similarly we can't snapshot files in that directory. Unfortunately there is no override to move those binaries. But with a bit creativity we can create a bootstrap image that has the shell installed into a different location ie. `/busybox2` and then use that bootstrap image to build the actual new debug image.
+
+```yaml
+bootstrap:
+  extends:
+    - .build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.24.0-debug
+    entrypoint: [""]
+  needs: []
+  variables:
+    IMAGE: ${CI_REGISTRY_IMAGE}/bootstrap:latest
+    EXTRA_ARGS: >-
+      --build-arg=TARGETARCH=amd64
+      --build-arg=TARGETOS=linux
+      --kaniko-dir=/kaniko2
+      --target=kaniko-debug-2
+    KANIKO_DIR: /kaniko2
+
+build:
+  extends:
+    - .build
+  image:
+    name: ${CI_REGISTRY_IMAGE}/bootstrap:latest
+    entrypoint: [""]
+  needs: [bootstrap]
+  variables:
+    IMAGE: ${CI_REGISTRY_IMAGE}/kaniko:latest
+    EXTRA_ARGS: >-
+      --build-arg=TARGETARCH=amd64
+      --build-arg=TARGETOS=linux
+      --kaniko-dir=/kaniko2
+      --target=kaniko-debug
+    KANIKO_DIR: /kaniko2
+```
+This is just an illustrative extract, please find the full [.gitlab-ci.yml](./docs/bootstrap.gitlab-ci.yml) here.
+
+With this two step approach we can now indeed bootstrap kaniko in kaniko. However, it is not really necessary to rebuild that intermediate bootstrap image every time, we can reuse it from a different build.
+
 
 ### Caching
 
