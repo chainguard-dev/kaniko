@@ -225,6 +225,7 @@ Right now, kaniko supports these storage solutions:
 - GCS Bucket
 - S3 Bucket
 - Azure Blob Storage
+- HTTP/HTTPS URLs
 - Local Directory
 - Local Tar
 - Standard Input
@@ -269,6 +270,7 @@ specify the location of your build context:
 | Standard Input     | tar://[stdin]                                                         | `tar://stdin`                                                                 |
 | GCS Bucket         | gs://[bucket name]/[path to .tar.gz]                                  | `gs://kaniko-bucket/path/to/context.tar.gz`                                   |
 | S3 Bucket          | s3://[bucket name]/[path to .tar.gz]                                  | `s3://kaniko-bucket/path/to/context.tar.gz`                                   |
+| HTTP/HTTPS URL     | http://[url to .tar.gz] or https://[url to .tar.gz]                   | `http://example.com/context.tar.gz`                                           |
 | Azure Blob Storage | https://[account].[azureblobhostsuffix]/[container]/[path to .tar.gz] | `https://myaccount.blob.core.windows.net/container/path/to/context.tar.gz`    |
 | Git Repository     | git://[repository url][#reference][#commit-id]                        | `git://github.com/acme/myproject.git#refs/heads/mybranch#<desired-commit-id>` |
 
@@ -282,6 +284,14 @@ If you are using Azure Blob Storage for context file, you will need to pass
 [Azure Storage Account Access Key](https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string?toc=%2fazure%2fstorage%2fblobs%2ftoc.json)
 as an environment variable named `AZURE_STORAGE_ACCESS_KEY` through Kubernetes
 Secrets
+
+### Using S3 Presigned URLs
+
+You can use S3 presigned URLs with the `https://` prefix instead of the `s3://` prefix. This is useful when you need to provide temporary access to private S3 objects without requiring AWS credentials in the kaniko container.
+
+```shell
+--context=https://my-bucket.s3.amazonaws.com/context.tar.gz?AWSAccessKeyId=...&Signature=...
+```
 
 ### Using Private Git Repository
 
