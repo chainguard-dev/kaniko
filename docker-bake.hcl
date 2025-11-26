@@ -1,6 +1,3 @@
-target "_common" {
-  dockerfile = "deploy/Dockerfile"
-}
 variable "image_semvar" {
   default = "latest"
 }
@@ -34,25 +31,25 @@ target "production" {
   matrix = {
     item = [
       {
-        container = "kaniko-slim"
+        container = "${slim_name}"
         context = {
           context =  "target:kaniko-base-slim"
         }
       },
       {
-        container = "kaniko-debug"
+        container = "${debug_name}"
         context = {
-          context =  "target:kaniko-executor"
+          context =  "target:${executor_name}"
         }
       },
       {
-        container = "kaniko-executor"
+        container = "${executor_name}"
         context = {
           context =  "target:kaniko-base"
         }
       },
       {
-        container = "kaniko-warmer"
+        container = "${warmer_name}"
         context = {
           context =  "target:kaniko-base"
         }
@@ -71,4 +68,7 @@ target "kaniko-base-slim" {
   inherits = ["_common"]
   target = "kaniko-base-slim"
   context = "."
+}
+target "_common" {
+  dockerfile = "deploy/Dockerfile"
 }
