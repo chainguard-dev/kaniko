@@ -71,6 +71,7 @@ var argsMap = map[string][]string{
 var envsMap = map[string][]string{
 	"Dockerfile_test_arg_secret":    {"SSH_PRIVATE_KEY=ThEPriv4t3Key"},
 	"Dockerfile_test_copyadd_chmod": {"DOCKER_BUILDKIT=1"},
+	"Dockerfile_test_issue_mz108":   {"DOCKER_BUILDKIT=1"},
 }
 
 // Arguments to build Dockerfiles with when building with docker
