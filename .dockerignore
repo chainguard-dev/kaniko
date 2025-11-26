@@ -6,4 +6,5 @@ docs/**/*
 .github/**/*
 logo/**/*
 out/**/*
-
+docker-bake.hcl
+docker-variables.hcl
