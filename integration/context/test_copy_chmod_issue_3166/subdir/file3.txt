@@ -1,0 +1,2 @@
+Test file 3 in subdirectory for issue #3166
+This tests nested directory permissions

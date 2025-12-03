@@ -1,0 +1,47 @@
+# Test for issue #3166: COPY --chmod=444 produces wrong directory permissions
+# This test verifies that directories get execute permissions when using restrictive chmod values
+FROM ubuntu
+
+# Create a test directory structure with COPY --chmod=444
+# This should result in directories having 555 permissions (with execute bits)
+# and files having 444 permissions (read-only)
+COPY --chmod=444 context/test_copy_chmod_issue_3166/ /file/
+
+# Test that directory has execute permissions (555)
+RUN test "$(stat -c "%a" /file)" = "555"
+
+# Test that files have the specified permissions (444)
+RUN test "$(stat -c "%a" /file/file1.txt)" = "444"
+RUN test "$(stat -c "%a" /file/file2.txt)" = "444"
+
+# Test that the directory is accessible by nobody user
+USER nobody
+RUN ls -la /file/ && echo "Directory is accessible"
+
+# Test with other restrictive chmod values
+USER root
+
+# Test --chmod=400 (r--------) -> directories should be 500 (r-x------)
+COPY --chmod=400 context/test_copy_chmod_issue_3166/ /test400/
+RUN test "$(stat -c "%a" /test400)" = "500"
+RUN test "$(stat -c "%a" /test400/file1.txt)" = "400"
+
+# Test --chmod=644 (rw-r--r--) -> directories should be 755 (rwxr-xr-x)
+COPY --chmod=644 context/test_copy_chmod_issue_3166/ /test644/
+RUN test "$(stat -c "%a" /test644)" = "755"
+RUN test "$(stat -c "%a" /test644/file1.txt)" = "644"
+
+# Test --chmod=600 (rw-------) -> directories should be 700 (rwx------)
+COPY --chmod=600 context/test_copy_chmod_issue_3166/ /test600/
+RUN test "$(stat -c "%a" /test600)" = "700"
+RUN test "$(stat -c "%a" /test600/file1.txt)" = "600"
+
+# Test nested directories
+COPY --chmod=444 context/test_copy_chmod_issue_3166/ /nested/
+RUN test "$(stat -c "%a" /nested)" = "555"
+RUN test "$(stat -c "%a" /nested/subdir)" = "555"
+RUN test "$(stat -c "%a" /nested/subdir/file3.txt)" = "444"
+
+# Final validation that all directories are accessible
+USER nobody
+RUN ls /file/ && ls /nested/subdir/ && echo "All directories accessible by nobody user"
