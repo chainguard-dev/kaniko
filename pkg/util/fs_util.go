@@ -41,6 +41,7 @@ import (
 	otiai10Cpy "github.com/otiai10/copy"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sys/unix"
 )
 
 const (
@@ -760,7 +761,13 @@ func CopyFile(src, dest string, context FileContext, uid, gid int64, chmod fs.Fi
 	if useDefaultChmod {
 		mode = fi.Mode()
 	}
-	return false, CreateFile(dest, srcFile, mode, uint32(uid), uint32(gid))
+
+	err = CreateFile(dest, srcFile, mode, uint32(uid), uint32(gid))
+	if err != nil {
+		return false, err
+	}
+
+	return false, CopyCapabilities(src, dest)
 }
 
 func NewFileContextFromDockerfile(dockerfilePath, buildcontext string) (FileContext, error) {
@@ -985,7 +992,8 @@ func CopyFileOrSymlink(src string, destDir string, root string) error {
 	if err := os.Chmod(destFile, fi.Mode()); err != nil {
 		return errors.Wrap(err, "copying file mode")
 	}
-	return nil
+
+	return CopyCapabilities(src, destFile)
 }
 
 // CopyOwnership copies the file or directory ownership recursively at src to dest
@@ -1033,6 +1041,24 @@ func CopyOwnership(src string, destDir string, root string) error {
 		stat := info.Sys().(*syscall.Stat_t)
 		return os.Chown(destPath, int(stat.Uid), int(stat.Gid))
 	})
+}
+
+// CopyCapabilities copies the file capabilities from src to dest
+func CopyCapabilities(src string, dest string) error {
+	capBuf := make([]byte, 1024)
+	n, err := unix.Getxattr(src, "security.capability", capBuf)
+	if err == syscall.ENODATA {
+		return nil
+	} else if err != nil {
+		return errors.Wrap(err, "getting security.capability from src")
+	}
+	if n > 0 {
+		err = unix.Setxattr(dest, "security.capability", capBuf[:n], 0)
+		if err != nil {
+			return errors.Wrap(err, "setting security.capability on dest")
+		}
+	}
+	return nil
 }
 
 func createParentDirectory(path string, uid int, gid int) error {
