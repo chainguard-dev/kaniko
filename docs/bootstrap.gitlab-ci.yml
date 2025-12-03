@@ -1,0 +1,64 @@
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+default:
+  interruptible: true
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+
+stages:
+  - build
+
+.build:
+  stage: build
+  script:
+    - /kaniko/executor
+      --context $CI_PROJECT_DIR
+      --dockerfile deploy/Dockerfile
+      --destination=${IMAGE}
+      --cache=true
+      --cache-copy-layers
+      --cache-dir /cache/kaniko
+      --cache-repo ${CI_REGISTRY_IMAGE}/cache
+      --skip-unused-stages
+      $EXTRA_ARGS
+
+bootstrap:
+  extends:
+    - .build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.24.0-debug
+    entrypoint: [""]
+  needs: []
+  variables:
+    IMAGE: ${CI_REGISTRY_IMAGE}/bootstrap:latest
+    EXTRA_ARGS: >-
+      --build-arg=TARGETARCH=amd64
+      --build-arg=TARGETOS=linux  
+      --kaniko-dir=/kaniko2
+      --target=kaniko-debug-2
+    KANIKO_DIR: /kaniko2
+
+build:
+  extends:
+    - .build
+  image:
+    name: ${CI_REGISTRY_IMAGE}/bootstrap:latest
+    entrypoint: [""]
+  needs: [bootstrap]
+  variables:
+    IMAGE: ${CI_REGISTRY_IMAGE}/kaniko:latest
+    EXTRA_ARGS: >-
+      --build-arg=TARGETARCH=amd64
+      --build-arg=TARGETOS=linux  
+      --kaniko-dir=/kaniko2
+      --target=kaniko-debug
+    KANIKO_DIR: /kaniko2
