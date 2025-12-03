@@ -29,15 +29,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// HTTPSTar struct for https tar.gz files processing
-type HTTPSTar struct {
+// HTTPContext struct for http/https tar.gz files processing
+type HTTPContext struct {
 	context string
 }
 
-// UnpackTarFromBuildContext downloads context file from https server
-func (h *HTTPSTar) UnpackTarFromBuildContext() (directory string, err error) {
+// UnpackTarFromBuildContext downloads context file from http/https server
+func (h *HTTPContext) UnpackTarFromBuildContext() (directory string, err error) {
 
-	logrus.Info("Retrieving https tar file")
+	logrus.Info("Retrieving tar file from URL")
 
 	// Create directory and target file for downloading the context file
 	directory = kConfig.BuildContextDir
@@ -60,20 +60,20 @@ func (h *HTTPSTar) UnpackTarFromBuildContext() (directory string, err error) {
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return directory, fmt.Errorf("HTTPSTar bad status from server: %s", resp.Status)
+		return directory, fmt.Errorf("HTTP bad status from server: %s", resp.Status)
 	}
 
 	if _, err = io.Copy(file, resp.Body); err != nil {
 		return tarPath, err
 	}
 
-	logrus.Info("Retrieved https tar file")
+	logrus.Info("Retrieved tar file from URL")
 
 	if err = util.UnpackCompressedTar(tarPath, directory); err != nil {
 		return
 	}
 
-	logrus.Info("Extracted https tar file")
+	logrus.Info("Extracted tar file from URL")
 
 	// Remove the tar so it doesn't interfere with subsequent commands
 	return directory, os.Remove(tarPath)
