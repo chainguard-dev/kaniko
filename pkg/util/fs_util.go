@@ -866,6 +866,12 @@ func MkdirAllWithPermissions(path string, mode os.FileMode, uid, gid int64) erro
 			),
 		)
 	}
+
+	if CheckIgnoreList(path) {
+		logrus.Debugf("Skipping chown/chmod for ignored path: %s", path)
+		return nil
+	}
+
 	if err := os.Chown(path, int(uid), int(gid)); err != nil {
 		return err
 	}
@@ -875,6 +881,11 @@ func MkdirAllWithPermissions(path string, mode os.FileMode, uid, gid int64) erro
 }
 
 func setFilePermissions(path string, mode os.FileMode, uid, gid int) error {
+	if CheckIgnoreList(path) {
+		logrus.Debugf("Skipping permissions for ignored path: %s", path)
+		return nil
+	}
+
 	if err := os.Chown(path, uid, gid); err != nil {
 		return err
 	}
