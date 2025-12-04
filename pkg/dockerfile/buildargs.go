@@ -19,12 +19,14 @@ package dockerfile
 import (
 	"strings"
 
-	d "github.com/docker/docker/builder/dockerfile"
 	"github.com/moby/buildkit/frontend/dockerfile/instructions"
 )
 
 type BuildArgs struct {
-	d.BuildArgs
+	// args are the build args passed via CLI
+	args map[string]*string
+	// allowed are the args specified in the Dockerfile via ARG instruction
+	allowed map[string]*string
 }
 
 func NewBuildArgs(args []string) *BuildArgs {
@@ -38,14 +40,23 @@ func NewBuildArgs(args []string) *BuildArgs {
 		}
 	}
 	return &BuildArgs{
-		BuildArgs: *d.NewBuildArgs(argsFromOptions),
+		args:    argsFromOptions,
+		allowed: make(map[string]*string),
 	}
 }
 
 func (b *BuildArgs) Clone() *BuildArgs {
-	clone := b.BuildArgs.Clone()
+	cloneArgs := make(map[string]*string)
+	for k, v := range b.args {
+		cloneArgs[k] = v
+	}
+	cloneAllowed := make(map[string]*string)
+	for k, v := range b.allowed {
+		cloneAllowed[k] = v
+	}
 	return &BuildArgs{
-		BuildArgs: *clone,
+		args:    cloneArgs,
+		allowed: cloneAllowed,
 	}
 }
 
@@ -59,6 +70,33 @@ func (b *BuildArgs) ReplacementEnvs(envs []string) []string {
 	return append(resultEnv, filtered...) //nolint:makezero
 }
 
+// FilterAllowed returns the list of allowed build args that should be added to the environment
+func (b *BuildArgs) FilterAllowed(envs []string) []string {
+	var filtered []string
+	for key, defaultVal := range b.allowed {
+		// 1. Check if passed via CLI
+		if val, ok := b.args[key]; ok && val != nil {
+			filtered = append(filtered, key+"="+*val)
+			continue
+		}
+		// 2. Check if it has a default value from ARG instruction
+		if defaultVal != nil {
+			filtered = append(filtered, key+"="+*defaultVal)
+			continue
+		}
+		// 3. Check if it exists in the current environment (inherited)
+		// This is for ARG foo (without default), it picks up foo from env if set
+		for _, env := range envs {
+			s := strings.SplitN(env, "=", 2)
+			if len(s) == 2 && s[0] == key {
+				filtered = append(filtered, env)
+				break
+			}
+		}
+	}
+	return filtered
+}
+
 // AddMetaArgs adds the supplied args map to b's allowedMetaArgs
 func (b *BuildArgs) AddMetaArgs(metaArgs []instructions.ArgCommand) {
 	for _, marg := range metaArgs {
@@ -67,4 +105,35 @@ func (b *BuildArgs) AddMetaArgs(metaArgs []instructions.ArgCommand) {
 			b.AddMetaArg(arg.Key, v)
 		}
 	}
+}
+
+func (b *BuildArgs) AddMetaArg(key string, value *string) {
+	b.allowed[key] = value
+}
+
+// AddArg adds a new build arg or updates an existing one
+func (b *BuildArgs) AddArg(key string, value *string) {
+	b.allowed[key] = value
+}
+
+// GetAllAllowed returns the map of build args passed via CLI
+func (b *BuildArgs) GetAllAllowed() map[string]string {
+	m := make(map[string]string)
+	for k, v := range b.args {
+		if v != nil {
+			m[k] = *v
+		}
+	}
+	return m
+}
+
+// GetAllMeta returns the map of args defined in Dockerfile
+func (b *BuildArgs) GetAllMeta() map[string]string {
+	m := make(map[string]string)
+	for k, v := range b.allowed {
+		if v != nil {
+			m[k] = *v
+		}
+	}
+	return m
 }

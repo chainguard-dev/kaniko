@@ -29,10 +29,10 @@ import (
 	"syscall"
 
 	"github.com/chainguard-dev/kaniko/pkg/config"
-	"github.com/docker/docker/pkg/archive"
-	"github.com/docker/docker/pkg/system"
+	"github.com/moby/go-archive"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sys/unix"
 )
 
 // Tar knows how to write files to a tar file.
@@ -154,8 +154,8 @@ func writeSecurityXattrToTarFile(path string, hdr *tar.Header) error {
 		return nil
 	}
 	if capability, ok := hdr.Xattrs[securityCapabilityXattr]; ok {
-		err := system.Lsetxattr(path, securityCapabilityXattr, []byte(capability), 0)
-		if err != nil && !errors.Is(err, syscall.EOPNOTSUPP) && !errors.Is(err, system.ErrNotSupportedPlatform) {
+		err := unix.Lsetxattr(path, securityCapabilityXattr, []byte(capability), 0)
+		if err != nil && !errors.Is(err, syscall.EOPNOTSUPP) {
 			return errors.Wrapf(err, "failed to write %q attribute to %q", securityCapabilityXattr, path)
 		}
 	}
@@ -168,14 +168,36 @@ func readSecurityXattrToTarHeader(path string, hdr *tar.Header) error {
 	if hdr.Xattrs == nil {
 		hdr.Xattrs = make(map[string]string)
 	}
-	capability, err := system.Lgetxattr(path, securityCapabilityXattr)
-	if err != nil && !errors.Is(err, syscall.EOPNOTSUPP) && !errors.Is(err, system.ErrNotSupportedPlatform) {
+	capability, err := lgetxattr(path, securityCapabilityXattr)
+	if err != nil {
+		if errors.Is(err, syscall.EOPNOTSUPP) || errors.Is(err, unix.ENODATA) {
+			return nil
+		}
 		return errors.Wrapf(err, "failed to read %q attribute from %q", securityCapabilityXattr, path)
 	}
 	if capability != nil {
 		hdr.Xattrs[securityCapabilityXattr] = string(capability)
 	}
 	return nil
+}
+
+func lgetxattr(path, attr string) ([]byte, error) {
+	// Start with a 128 byte buffer
+	dest := make([]byte, 128)
+	sz, err := unix.Lgetxattr(path, attr, dest)
+	if err == unix.ERANGE {
+		// Buffer too small, get size
+		sz, err = unix.Lgetxattr(path, attr, nil)
+		if err != nil {
+			return nil, err
+		}
+		dest = make([]byte, sz)
+		sz, err = unix.Lgetxattr(path, attr, dest)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return dest[:sz], nil
 }
 
 func (t *Tar) Whiteout(p string) error {
