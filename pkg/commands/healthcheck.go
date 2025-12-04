@@ -18,7 +18,7 @@ package commands
 
 import (
 	"github.com/chainguard-dev/kaniko/pkg/dockerfile"
-	"github.com/docker/docker/api/types/container"
+	"github.com/moby/moby/api/types/container"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/moby/buildkit/frontend/dockerfile/instructions"
 )
