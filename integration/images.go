@@ -112,6 +112,22 @@ var outputChecks = map[string]func(string, []byte) error{
 
 		return nil
 	},
+	"Dockerfile_test_apk_install_root": func(_ string, out []byte) error {
+		errorPatterns := []string{
+			"operation not permitted",
+			"chown /proc",
+			"chown /sys",
+			"chown /dev",
+		}
+
+		for _, pattern := range errorPatterns {
+			if strings.Contains(string(out), pattern) {
+				return fmt.Errorf("output must not contain error pattern %q", pattern)
+			}
+		}
+
+		return nil
+	},
 }
 
 // Checks if argument are not printed in output.

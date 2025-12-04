@@ -1,0 +1,16 @@
+FROM alpine@sha256:b58899f069c47216f6002a6850143dc6fae0d35eb8b0df9300bbe6327b9c2171 as build
+
+RUN apk add --no-scripts --initdb \
+  --root /installroot \
+  bash
+
+RUN ls -la /installroot/ && \
+    test -d /installroot/proc && \
+    test -d /installroot/sys && \
+    test -d /installroot/dev
+
+FROM scratch as final
+
+COPY --from=build /installroot /
+
+CMD ["/bin/bash"]

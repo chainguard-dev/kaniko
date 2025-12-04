@@ -1562,3 +1562,94 @@ func Test_setFileTimes(t *testing.T) {
 		})
 	}
 }
+
+func Test_MkdirAllWithPermissions_IgnoredPaths(t *testing.T) {
+	testDir := t.TempDir()
+
+	testPaths := []string{
+		filepath.Join(testDir, "proc"),
+		filepath.Join(testDir, "sys"),
+		filepath.Join(testDir, "dev"),
+	}
+
+	originalIgnoreList := ignorelist
+	defer func() {
+		ignorelist = originalIgnoreList
+	}()
+
+	ignorelist = []IgnoreListEntry{
+		{Path: filepath.Join(testDir, "proc"), PrefixMatchOnly: false},
+		{Path: filepath.Join(testDir, "sys"), PrefixMatchOnly: false},
+		{Path: filepath.Join(testDir, "dev"), PrefixMatchOnly: false},
+	}
+
+	for _, path := range testPaths {
+		err := MkdirAllWithPermissions(path, 0o755, 1000, 1000)
+		if err != nil {
+			t.Errorf("MkdirAllWithPermissions(%s) failed: %v", path, err)
+		}
+
+		if !FilepathExists(path) {
+			t.Errorf("Directory %s was not created", path)
+		}
+	}
+}
+
+func Test_setFilePermissions_IgnoredPaths(t *testing.T) {
+	testDir := t.TempDir()
+	testFile := filepath.Join(testDir, "proc", "testfile")
+
+	originalIgnoreList := ignorelist
+	defer func() {
+		ignorelist = originalIgnoreList
+	}()
+
+	ignorelist = []IgnoreListEntry{
+		{Path: filepath.Join(testDir, "proc"), PrefixMatchOnly: true},
+	}
+
+	if err := os.MkdirAll(filepath.Dir(testFile), 0o755); err != nil {
+		t.Fatalf("Failed to create test directory: %v", err)
+	}
+
+	f, err := os.Create(testFile)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+	f.Close()
+
+	err = setFilePermissions(testFile, 0o644, 1000, 1000)
+	if err != nil {
+		t.Errorf("setFilePermissions(%s) failed: %v", testFile, err)
+	}
+
+	if !FilepathExists(testFile) {
+		t.Errorf("File %s was removed unexpectedly", testFile)
+	}
+}
+
+func Test_MkdirAllWithPermissions_NonIgnoredPaths(t *testing.T) {
+	testDir := t.TempDir()
+
+	originalIgnoreList := ignorelist
+	defer func() {
+		ignorelist = originalIgnoreList
+	}()
+
+	ignorelist = append([]IgnoreListEntry{}, defaultIgnoreList...)
+	testPath := filepath.Join(testDir, "normaldir")
+
+	err := MkdirAllWithPermissions(testPath, 0o755, int64(os.Getuid()), int64(os.Getgid()))
+	if err != nil {
+		t.Errorf("MkdirAllWithPermissions(%s) failed: %v", testPath, err)
+	}
+
+	fi, err := os.Stat(testPath)
+	if err != nil {
+		t.Fatalf("Failed to stat directory: %v", err)
+	}
+
+	if fi.Mode() != 0o755|os.ModeDir {
+		t.Errorf("Expected mode 0755|ModeDir, got %v", fi.Mode())
+	}
+}
