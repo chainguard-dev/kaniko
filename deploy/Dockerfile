@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.25 AS builder
+FROM golang:1.25@sha256:20b91eda7a9627c127c0225b0d4e8ec927b476fa4130c6760928b849d769c149 AS builder
 WORKDIR /src
 
 # This arg is passed by docker buildx & contains the target CPU architecture (e.g., amd64, arm64, etc.)
@@ -55,11 +55,11 @@ RUN \
   make out/executor out/warmer
 
 # Generate latest ca-certificates
-FROM debian:bookworm-slim AS certs
+FROM debian:bookworm-slim@sha256:b4aa902587c2e61ce789849cb54c332b0400fe27b1ee33af4669e1f7e7c3e22f AS certs
 RUN apt update && apt install -y ca-certificates
 
 # use musl busybox since it's staticly compiled on all platforms
-FROM busybox:musl AS busybox
+FROM busybox:musl@sha256:ef13e7482851632be3faf5bd1d28d4727c0810901d564b35416f309975a12a30 AS busybox
 
 FROM scratch AS kaniko-base-slim
 

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM docker.io/debian:bullseye-slim as base
+FROM docker.io/debian:bullseye-slim@sha256:530a3348fc4b5734ffe1a137ddbcee6850154285251b53c3425c386ea8fac77b as base
 FROM base as build
 COPY ["top1", "/tmp/top1"]
 RUN \

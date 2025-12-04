@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM bash:4.4
+FROM bash:4.4@sha256:8fb4d13129d7d61cf4f670eed1a23db397a16352671ee758f4faed7b6e3c3f57
 
 ARG NUM
 COPY context.txt .
