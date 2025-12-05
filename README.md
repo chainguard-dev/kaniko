@@ -10,6 +10,45 @@ or Kubernetes cluster.
 > repository, which was archived in June of 2025. Further details in
 > [History and Status](#history-and-status).
 
+## History and Status
+
+kaniko was originally created by [Priya Wadhwa
+(@priyawadhwa)](https://github.com/priyawadhwa), [Dan Lorenc
+(dlorenc)](https://github.com/dlorenc), and others at Google and published at
+[GoogleContainerTools/kaniko](https://github.com/GoogleContainerTools/kaniko).
+The project was archived in June 2025 and [forked by Chainguard, including Priya
+and
+Dan,](https://www.chainguard.dev/unchained/fork-yeah-were-bringing-kaniko-back)
+to [chainguard-dev/kaniko](https://github.com/chainguard-dev/kaniko) to continue
+upkeep with security patches and maintenance of the project.
+
+No major feature work is planned.
+
+## Releases
+
+kaniko releases are only created as [tags on the source
+repository](https://github.com/chainguard-dev/kaniko/tags).
+
+Release notes and source code archives are available on the [releases
+section](https://github.com/chainguard-dev/kaniko/releases).
+
+Binary release artifacts such as container images are **not published**. The old
+container images as `gcr.io/kaniko-project/executor` and
+`gcr.io/kaniko-project/warmer` are unmaintained and no longer updated. Users
+[must build these artifacts themselves](DEVELOPMENT.md) or use the Chainguard
+container images as customer:
+
+* [kaniko](https://images.chainguard.dev/directory/image/kaniko)
+* [kaniko-warmer](https://images.chainguard.dev/directory/image/kaniko-warmer)
+* [kaniko-fips](https://images.chainguard.dev/directory/image/kaniko-fips)
+* [kaniko-warmer-fips](https://images.chainguard.dev/directory/image/kaniko-warmer-fips)
+
+Other available images:
+
+* [kaniko-build organization](https://github.com/kaniko-build)
+
+##
+
 kaniko doesn't depend on a Docker daemon and executes each command within a
 Dockerfile completely in userspace. This enables building container images in
 environments that can't easily or securely run a Docker daemon, such as a
@@ -121,56 +160,6 @@ expect - see [Known Issues](#known-issues).
   - [References](#references)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-## History and Status
-
-kaniko was originally created by [Priya Wadhwa
-(@priyawadhwa)](https://github.com/priyawadhwa), [Dan Lorenc
-(dlorenc)](https://github.com/dlorenc), and others at Google and published at
-[GoogleContainerTools/kaniko](https://github.com/GoogleContainerTools/kaniko).
-The project was archived in June 2025 and [forked by Chainguard, including Priya
-and
-Dan,](https://www.chainguard.dev/unchained/fork-yeah-were-bringing-kaniko-back)
-to [chainguard-dev/kaniko](https://github.com/chainguard-dev/kaniko) to continue
-upkeep with security patches and maintenance of the project.
-
-No major feature work is planned.
-
-## Community
-
-If you are interested in contributing to kaniko, learn more from our
-[development](DEVELOPMENT.md) and [contributing](CONTRIBUTING.md) guides.
-
-For any community discussion [participate in open
-issues](https://github.com/chainguard-dev/kaniko/issues) or [file a new
-issue](https://github.com/chainguard-dev/kaniko/issues/new/choose).
-
-Some community members can be found on [#kaniko on Kubernetes
-Slack](https://kubernetes.slack.com/messages/CQDCHGX7Y/) but there is no active
-monitoring, regular availability, or access to older discussions.
-
-## Releases
-
-kaniko releases are only created as [tags on the source
-repository](https://github.com/chainguard-dev/kaniko/tags).
-
-Release notes and source code archives are available on the [releases
-section](https://github.com/chainguard-dev/kaniko/releases).
-
-Binary release artifacts such as container images are **not published**. The old
-container images as `gcr.io/kaniko-project/executor` and
-`gcr.io/kaniko-project/warmer` are unmaintained and no longer updated. Users
-[must build these artifacts themselves](DEVELOPMENT.md) or use the Chainguard
-container images as customer:
-
-* [kaniko](https://images.chainguard.dev/directory/image/kaniko)
-* [kaniko-warmer](https://images.chainguard.dev/directory/image/kaniko-warmer)
-* [kaniko-fips](https://images.chainguard.dev/directory/image/kaniko-fips)
-* [kaniko-warmer-fips](https://images.chainguard.dev/directory/image/kaniko-warmer-fips)
-
-Other available images:
-
-* [kaniko-build organization](https://github.com/kaniko-build)
 
 ## How does kaniko work?
 
