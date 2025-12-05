@@ -47,6 +47,11 @@ Other available images:
 
 * [kaniko-build organization](https://github.com/kaniko-build)
 
+## Community
+
+Some community members can be found on [#kaniko on Kubernetes Slack](https://kubernetes.slack.com/messages/CQDCHGX7Y/) 
+but there is no active monitoring, regular availability, or access to older discussions.
+
 ##
 
 kaniko doesn't depend on a Docker daemon and executes each command within a
