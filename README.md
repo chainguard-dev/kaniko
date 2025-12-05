@@ -9,6 +9,34 @@ or Kubernetes cluster.
 > This is a supported replacement of the original `GoogleContainerTools/kaniko`
 > repository, which was archived in June of 2025. Further details in
 > [History and Status](#history-and-status).
+>
+> Community contributions are not being accepted at this time. The documentation
+> has been carried over directly from the original repository and may not reflect
+> recent changes. We will update dependencies only to resolve security
+> vulnerabilities (CVEs). If a dependency update to resolve a CVE requires more than updating
+> dependency versions, if it, for instance, requires making extensive changes to accommodate
+> a new API, we will, as a general policy, not make that change in order to avoid accidentally
+> introducing a regression.
+
+## History and Status
+
+kaniko was originally created by Google and published at
+[GoogleContainerTools/kaniko](https://github.com/GoogleContainerTools/kaniko).
+The project was archived in June 2025 and forked by Chainguard to [chainguard-forks/kaniko](https://github.com/chainguard-forks/kaniko).
+
+No feature work is planned.
+
+## Releases
+
+kaniko releases are only created as [tags on the source
+repository](https://github.com/chainguard-forks/kaniko/tags).
+
+Release notes and source code archives are available on the [releases
+section](https://github.com/chainguard-forks/kaniko/releases).
+
+Binary release artifacts such as container images are **not published**.
+
+##
 
 kaniko doesn't depend on a Docker daemon and executes each command within a
 Dockerfile completely in userspace. This enables building container images in
