@@ -78,6 +78,12 @@ var (
 // GetContainerRuntime returns the container runtime the process is running in.
 // If pid is less than one, it returns the runtime for "self".
 func GetContainerRuntime(tgid, pid int) ContainerRuntime {
+	// Check for container specific files
+	runtime := detectContainerFiles()
+	if runtime != RuntimeNotFound {
+		return runtime
+	}
+
 	file := "/proc/self/cgroup"
 	if pid > 0 {
 		if tgid > 0 {
@@ -89,7 +95,7 @@ func GetContainerRuntime(tgid, pid int) ContainerRuntime {
 
 	// read the cgroups file
 	a := readFileString(file)
-	runtime := getContainerRuntime(a)
+	runtime = getContainerRuntime(a)
 	if runtime != RuntimeNotFound {
 		return runtime
 	}
@@ -130,12 +136,6 @@ func GetContainerRuntime(tgid, pid int) ContainerRuntime {
 	// which needs CAP_SYS_PTRACE
 	a = readFileString("/run/systemd/container")
 	runtime = getContainerRuntime(a)
-	if runtime != RuntimeNotFound {
-		return runtime
-	}
-
-	// Check for container specific files
-	runtime = detectContainerFiles()
 	if runtime != RuntimeNotFound {
 		return runtime
 	}
