@@ -833,10 +833,10 @@ func TestLookupUser(t *testing.T) {
 		{
 			testname: "uid",
 			args: args{
-				userStr: "30000",
+				userStr: "999999",
 			},
 			expected: &user.User{
-				Uid:     "30000",
+				Uid:     "999999",
 				HomeDir: "/",
 			},
 			wantErr: false,
