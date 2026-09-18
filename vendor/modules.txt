@@ -410,7 +410,7 @@ github.com/containerd/containerd/platforms
 # github.com/containerd/containerd/api v1.10.0
 ## explicit; go 1.23.0
 github.com/containerd/containerd/api/types
-# github.com/containerd/containerd/v2 v2.2.5
+# github.com/containerd/containerd/v2 v2.2.8
 ## explicit; go 1.25.0
 github.com/containerd/containerd/v2/core/containers
 github.com/containerd/containerd/v2/core/content
@@ -1410,7 +1410,7 @@ google.golang.org/grpc/xds
 google.golang.org/grpc/xds/bootstrap
 google.golang.org/grpc/xds/csds
 google.golang.org/grpc/xds/googledirectpath
-# google.golang.org/protobuf v1.36.11
+# google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af
 ## explicit; go 1.23
 google.golang.org/protobuf/encoding/protodelim
 google.golang.org/protobuf/encoding/protojson
