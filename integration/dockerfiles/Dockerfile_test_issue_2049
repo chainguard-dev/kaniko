@@ -1,4 +1,13 @@
-FROM debian:bullseye-20220328
+# Regression test for https://github.com/GoogleContainerTools/kaniko/issues/2049:
+# binaries installed by a large apt-get layer (which also upgrades packages
+# already present in the base image) must all survive into the final image.
+#
+# Originally based on debian:bullseye-20220328. bullseye is end of life and its
+# bullseye-security archive has been withdrawn (every package fetch 404s), so
+# `apt-get install` fails at the reference `docker build` before kaniko is even
+# invoked. Moved to debian:12.10, like the other Debian fixtures; the same
+# package set installs and still upgrades base-image packages.
+FROM debian:12.10
 
 RUN set -x; \
     apt-get update && \
