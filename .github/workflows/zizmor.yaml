@@ -33,14 +33,18 @@ jobs:
       security-events: write # Upload SARIF results to Code Scanning
 
     steps:
-      - uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: block
+          # zizmor-action >= v0.7 bootstraps zizmor from PyPI (`pip download`)
+          # instead of running the ghcr.io container image, so it needs the
+          # package index and the wheel host; the registry endpoints the old
+          # container-based action used are no longer needed.
           allowed-endpoints: >
             api.github.com:443
             github.com:443
-            pkg-containers.githubusercontent.com:443
-            ghcr.io
+            pypi.org:443
+            files.pythonhosted.org:443
 
       - name: Check out code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -48,6 +52,6 @@ jobs:
           persist-credentials: false
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
+        uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
         with:
           persona: pedantic
